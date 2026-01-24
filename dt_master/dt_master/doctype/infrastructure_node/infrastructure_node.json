@@ -1,0 +1,328 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:node_name",
+ "creation": "2025-12-17 21:07:44.555102",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "identity_section",
+  "node_name",
+  "provider",
+  "region",
+  "node_type",
+  "frappe_version",
+  "status",
+  "state",
+  "install_dependencies",
+  "install_bench",
+  "initialize_project",
+  "prepare_project",
+  "start_project",
+  "stop_project",
+  "check_system_status",
+  "capacity_section",
+  "cpu_cores",
+  "ram_gb",
+  "storage_gb",
+  "max_sites",
+  "access_section",
+  "hosting_model",
+  "ip_address",
+  "ssh_user",
+  "ssh_port",
+  "wsgi_port",
+  "os_type",
+  "os_version",
+  "project_base_dir",
+  "project_logs_dir",
+  "project_service_name",
+  "access_verified",
+  "access_notes",
+  "cost_and_ccounting",
+  "monthly_cost",
+  "currency",
+  "billing_owner",
+  "metadata_section",
+  "auto_provisioned",
+  "provisioned_on",
+  "node_action_logs"
+ ],
+ "fields": [
+  {
+   "fieldname": "identity_section",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "fieldname": "node_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Node Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Link",
+   "label": "Provider",
+   "options": "Infrastructure Provider"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "options": "Infrastructure Region"
+  },
+  {
+   "fieldname": "node_type",
+   "fieldtype": "Select",
+   "label": "Node Type",
+   "options": "Shared\nDedicated"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Provisioning\nActive\nMaintenance\nRetired"
+  },
+  {
+   "fieldname": "capacity_section",
+   "fieldtype": "Section Break",
+   "label": "Capacity"
+  },
+  {
+   "fieldname": "cpu_cores",
+   "fieldtype": "Int",
+   "label": "CPU Cores"
+  },
+  {
+   "fieldname": "ram_gb",
+   "fieldtype": "Int",
+   "label": "RAM (GB)"
+  },
+  {
+   "fieldname": "storage_gb",
+   "fieldtype": "Int",
+   "label": "Storage (GB)"
+  },
+  {
+   "fieldname": "max_sites",
+   "fieldtype": "Int",
+   "label": "Max Sites"
+  },
+  {
+   "fieldname": "access_section",
+   "fieldtype": "Section Break",
+   "label": "Access"
+  },
+  {
+   "fieldname": "ip_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "IP Address"
+  },
+  {
+   "fieldname": "ssh_user",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "SSH User"
+  },
+  {
+   "fieldname": "ssh_port",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "SSH Port"
+  },
+  {
+   "fieldname": "access_notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "cost_and_ccounting",
+   "fieldtype": "Section Break",
+   "label": "Cost & Accounting"
+  },
+  {
+   "fieldname": "monthly_cost",
+   "fieldtype": "Currency",
+   "label": "Monthly Cost"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "billing_owner",
+   "fieldtype": "Select",
+   "label": "Billing Owner",
+   "options": "Platform\nCustomer"
+  },
+  {
+   "fieldname": "metadata_section",
+   "fieldtype": "Section Break",
+   "label": "Metadata"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_provisioned",
+   "fieldtype": "Check",
+   "label": "Created Automatically"
+  },
+  {
+   "fieldname": "provisioned_on",
+   "fieldtype": "Datetime",
+   "label": "Provisioned On"
+  },
+  {
+   "fieldname": "hosting_model",
+   "fieldtype": "Select",
+   "label": "Hosting Model",
+   "options": "Compute\nManaged"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Select",
+   "label": "State",
+   "options": "Declared\nSSH Ready\nDeps Installed\nProject Installed\nInitialized\nHealthy\nRunning\nStopped\nDecommissioned\nError"
+  },
+  {
+   "fieldname": "node_action_logs",
+   "fieldtype": "Table",
+   "label": "Node Action Logs",
+   "options": "Node Action Log"
+  },
+  {
+   "description": "Compatibility guard",
+   "fieldname": "os_type",
+   "fieldtype": "Select",
+   "label": "OS Type",
+   "options": "Ubuntu",
+   "reqd": 1
+  },
+  {
+   "description": "22.04: Informational",
+   "fieldname": "os_version",
+   "fieldtype": "Data",
+   "label": "OS Version"
+  },
+  {
+   "description": "/opt/dtsaas: Where project live",
+   "fieldname": "project_base_dir",
+   "fieldtype": "Data",
+   "label": "Project Base Dir",
+   "reqd": 1
+  },
+  {
+   "description": "/var/log/dtsaas: Centralized logs",
+   "fieldname": "project_logs_dir",
+   "fieldtype": "Data",
+   "label": "Project Logs Dir",
+   "reqd": 1
+  },
+  {
+   "description": "dtsaas: Future systemd",
+   "fieldname": "project_service_name",
+   "fieldtype": "Data",
+   "label": "Project Service Name"
+  },
+  {
+   "default": "0",
+   "description": "Human safety latch",
+   "fieldname": "access_verified",
+   "fieldtype": "Check",
+   "label": "Access Verified",
+   "reqd": 1
+  },
+  {
+   "button_color": "Primary",
+   "description": "SSH Ready \u2192 Deps Installed",
+   "fieldname": "install_dependencies",
+   "fieldtype": "Button",
+   "label": "Install Dependencies"
+  },
+  {
+   "button_color": "Primary",
+   "description": "Deps Installed \u2192 Project Installed",
+   "fieldname": "install_bench",
+   "fieldtype": "Button",
+   "label": "Install Bench"
+  },
+  {
+   "button_color": "Info",
+   "description": "Project Installed \u2192 Initialized",
+   "fieldname": "initialize_project",
+   "fieldtype": "Button",
+   "label": "Initialize Project"
+  },
+  {
+   "button_color": "Success",
+   "description": "Healthy / Stopped \u2192 Running",
+   "fieldname": "start_project",
+   "fieldtype": "Button",
+   "label": "Start Project"
+  },
+  {
+   "button_color": "Warning",
+   "description": "Running \u2192 Stopped",
+   "fieldname": "stop_project",
+   "fieldtype": "Button",
+   "label": "Stop Project"
+  },
+  {
+   "button_color": "Info",
+   "description": "Read-only",
+   "fieldname": "check_system_status",
+   "fieldtype": "Button",
+   "label": "Check System Status"
+  },
+  {
+   "button_color": "Info",
+   "description": "Initialized \u2192 Healthy",
+   "fieldname": "prepare_project",
+   "fieldtype": "Button",
+   "label": "Prepare Project"
+  },
+  {
+   "fieldname": "frappe_version",
+   "fieldtype": "Int",
+   "label": "Frappe Version"
+  },
+  {
+   "fieldname": "wsgi_port",
+   "fieldtype": "Int",
+   "label": "WSGI Port"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-21 23:34:25.891335",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Infrastructure Node",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,266 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{parent}-{app_name}",
+ "creation": "2026-01-05 10:59:50.661031",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_app_identity",
+  "app_name",
+  "section_break_app_classification",
+  "app_type",
+  "extension",
+  "extension_version",
+  "section_install_state",
+  "status",
+  "enabled",
+  "section_versioning",
+  "installed_version",
+  "target_version",
+  "section_audit",
+  "installed_at",
+  "last_updated",
+  "last_error",
+  "last_action",
+  "last_action_status",
+  "last_job_id",
+  "sync_state",
+  "git_branch",
+  "git_commit",
+  "git_dirty",
+  "git_head_state",
+  "action_buttons_section",
+  "install",
+  "upgrade",
+  "downgrade",
+  "reinstall",
+  "uninstall",
+  "check_version",
+  "remove",
+  "check_app"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_app_identity",
+   "fieldtype": "Section Break",
+   "label": "App Identity"
+  },
+  {
+   "description": "frappe, erpnext, hrms, etc",
+   "fieldname": "app_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "App Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_app_classification",
+   "fieldtype": "Section Break",
+   "label": "App Classification"
+  },
+  {
+   "fieldname": "app_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "App Type",
+   "options": "Core\nMarketplace\nInternal"
+  },
+  {
+   "depends_on": "eval:doc.app_type==\"Marketplace\"",
+   "description": "extension \u2192 Depends On: eval:doc.app_type==\"Marketplace\"",
+   "fieldname": "extension",
+   "fieldtype": "Link",
+   "label": "Extension",
+   "options": "Extension"
+  },
+  {
+   "fieldname": "section_install_state",
+   "fieldtype": "Section Break",
+   "label": "Install State"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Pending\nInstalling\nInstalled\nUninstalled\nFailed\nDisabled"
+  },
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "section_versioning",
+   "fieldtype": "Section Break",
+   "label": "Versioning"
+  },
+  {
+   "description": "snapshot (copied from extension_version.version at install time)",
+   "fieldname": "installed_version",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Installed Version"
+  },
+  {
+   "description": "derived from extension_version.version",
+   "fieldname": "target_version",
+   "fieldtype": "Data",
+   "label": "Target Version"
+  },
+  {
+   "fieldname": "section_audit",
+   "fieldtype": "Section Break",
+   "label": "Audit & Diagnostics"
+  },
+  {
+   "fieldname": "installed_at",
+   "fieldtype": "Datetime",
+   "label": "Installed At"
+  },
+  {
+   "fieldname": "last_updated",
+   "fieldtype": "Datetime",
+   "label": "Last Updated"
+  },
+  {
+   "fieldname": "last_error",
+   "fieldtype": "Small Text",
+   "label": "Last Error"
+  },
+  {
+   "fieldname": "last_action",
+   "fieldtype": "Select",
+   "label": "Last Action",
+   "options": "Install\nUpgrade\nDowngrade\nReinstall\nUninstall\nCheck App"
+  },
+  {
+   "fieldname": "last_action_status",
+   "fieldtype": "Select",
+   "label": "Last Action Status",
+   "options": "Queued\nRunning\nSuccess\nFailed"
+  },
+  {
+   "fieldname": "last_job_id",
+   "fieldtype": "Data",
+   "label": "Last Job Id"
+  },
+  {
+   "fieldname": "sync_state",
+   "fieldtype": "Select",
+   "label": "Sync State",
+   "options": "In Sync\nDrifted\nPending"
+  },
+  {
+   "description": "source of truth",
+   "fieldname": "extension_version",
+   "fieldtype": "Link",
+   "label": "Extension Version",
+   "options": "Extension Version"
+  },
+  {
+   "button_color": "Success",
+   "description": "status = Pending",
+   "fieldname": "install",
+   "fieldtype": "Button",
+   "label": "Install"
+  },
+  {
+   "button_color": "Info",
+   "description": "status = Installed AND target_version > installed_version",
+   "fieldname": "upgrade",
+   "fieldtype": "Button",
+   "label": "Upgrade"
+  },
+  {
+   "button_color": "Info",
+   "description": "status = Installed AND target_version < installed_version",
+   "fieldname": "downgrade",
+   "fieldtype": "Button",
+   "label": "Downgrade"
+  },
+  {
+   "button_color": "Success",
+   "description": "status = Failed or status=Uninstalled",
+   "fieldname": "reinstall",
+   "fieldtype": "Button",
+   "label": "Reinstall"
+  },
+  {
+   "button_color": "Warning",
+   "description": "status = Installed OR Disabled",
+   "fieldname": "uninstall",
+   "fieldtype": "Button",
+   "label": "Uninstall"
+  },
+  {
+   "button_color": "Primary",
+   "fieldname": "check_version",
+   "fieldtype": "Button",
+   "label": "Check Version"
+  },
+  {
+   "button_color": "Danger",
+   "description": "status = uninstalled ",
+   "fieldname": "remove",
+   "fieldtype": "Button",
+   "label": "Remove"
+  },
+  {
+   "button_color": "Primary",
+   "description": "status = installed or status = uninstalled",
+   "fieldname": "check_app",
+   "fieldtype": "Button",
+   "label": "Check App"
+  },
+  {
+   "description": "Current branch or tag",
+   "fieldname": "git_branch",
+   "fieldtype": "Data",
+   "label": "Git Branch"
+  },
+  {
+   "description": "Short or full commit hash",
+   "fieldname": "git_commit",
+   "fieldtype": "Data",
+   "label": "Git Commit"
+  },
+  {
+   "description": "Working tree dirty",
+   "fieldname": "git_dirty",
+   "fieldtype": "Data",
+   "label": "Git Dirty"
+  },
+  {
+   "description": "branch / detached",
+   "fieldname": "git_head_state",
+   "fieldtype": "Data",
+   "label": "Git Head State"
+  },
+  {
+   "fieldname": "action_buttons_section",
+   "fieldtype": "Section Break",
+   "label": "Action Buttons"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-24 11:37:11.592095",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Tenant Installed App",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

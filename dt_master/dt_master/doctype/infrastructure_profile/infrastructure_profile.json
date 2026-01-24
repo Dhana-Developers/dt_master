@@ -1,0 +1,173 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:profile_name",
+ "creation": "2025-12-17 21:31:24.390966",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "profile_identity_section",
+  "profile_name",
+  "subscription_plan",
+  "description",
+  "deployment_rules_section",
+  "deployment_type",
+  "allowed_domain_type",
+  "max_sites",
+  "auto_provision",
+  "resource_limits_section",
+  "max_storage_gb",
+  "max_users",
+  "max_databases",
+  "capabilities_section",
+  "supports_custom_domain",
+  "supports_dedicated_server",
+  "supports_backups",
+  "operational_policy_section",
+  "backup_frequency",
+  "sla_level"
+ ],
+ "fields": [
+  {
+   "fieldname": "profile_identity_section",
+   "fieldtype": "Section Break",
+   "label": "Profile Identity"
+  },
+  {
+   "fieldname": "profile_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Profile Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "subscription_plan",
+   "fieldtype": "Link",
+   "label": "Subscription Plan",
+   "options": "Subscription Plan"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "deployment_rules_section",
+   "fieldtype": "Section Break",
+   "label": "Deployment Rules"
+  },
+  {
+   "fieldname": "deployment_type",
+   "fieldtype": "Select",
+   "label": "Deployment Type",
+   "options": "Shared\nDedicated"
+  },
+  {
+   "fieldname": "allowed_domain_type",
+   "fieldtype": "Select",
+   "label": "Allowed Domain Type",
+   "options": "Subdomain\nCustom Domain"
+  },
+  {
+   "fieldname": "max_sites",
+   "fieldtype": "Int",
+   "label": "Max Sites"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_provision",
+   "fieldtype": "Check",
+   "label": "Auto Provision"
+  },
+  {
+   "fieldname": "resource_limits_section",
+   "fieldtype": "Section Break",
+   "label": "Resource Limits"
+  },
+  {
+   "fieldname": "max_storage_gb",
+   "fieldtype": "Int",
+   "label": "Max Storage (GB)"
+  },
+  {
+   "fieldname": "max_users",
+   "fieldtype": "Int",
+   "label": "Max Users"
+  },
+  {
+   "fieldname": "max_databases",
+   "fieldtype": "Int",
+   "label": "Max Databases"
+  },
+  {
+   "fieldname": "capabilities_section",
+   "fieldtype": "Section Break",
+   "label": "Capabilities"
+  },
+  {
+   "default": "0",
+   "fieldname": "supports_custom_domain",
+   "fieldtype": "Check",
+   "label": "Supports Custom Domain"
+  },
+  {
+   "default": "0",
+   "fieldname": "supports_dedicated_server",
+   "fieldtype": "Check",
+   "label": "Supports Dedicated Server"
+  },
+  {
+   "default": "0",
+   "fieldname": "supports_backups",
+   "fieldtype": "Check",
+   "label": "Supports Backups"
+  },
+  {
+   "fieldname": "operational_policy_section",
+   "fieldtype": "Section Break",
+   "label": "Operational Policy"
+  },
+  {
+   "fieldname": "backup_frequency",
+   "fieldtype": "Select",
+   "label": "Backup Frequency",
+   "options": "Daily\nWeekly\nMonthly"
+  },
+  {
+   "description": "Service Level Agreement",
+   "fieldname": "sla_level",
+   "fieldtype": "Select",
+   "label": "SLA Level",
+   "options": "None\nStandard\nEnterprise"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-17 21:47:16.158726",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Infrastructure Profile",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

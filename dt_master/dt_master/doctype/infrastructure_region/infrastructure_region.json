@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:region_name",
+ "creation": "2025-12-17 20:53:05.451381",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "region_code",
+  "region_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "region_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Region Code"
+  },
+  {
+   "fieldname": "region_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Region Name",
+   "unique": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-18 03:04:50.060247",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Infrastructure Region",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

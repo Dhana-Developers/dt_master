@@ -1,0 +1,115 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{extension}-{version}",
+ "creation": "2026-01-06 12:37:07.512771",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "version",
+  "frappe_min",
+  "frappe_max",
+  "release_notes",
+  "deprecated",
+  "extension",
+  "checksum_or_signature",
+  "source_ref",
+  "ref_type",
+  "install_strategy",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "version",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Version",
+   "reqd": 1
+  },
+  {
+   "fieldname": "frappe_min",
+   "fieldtype": "Data",
+   "label": "Frappe Min"
+  },
+  {
+   "fieldname": "frappe_max",
+   "fieldtype": "Data",
+   "label": "frappe Max"
+  },
+  {
+   "fieldname": "release_notes",
+   "fieldtype": "Text",
+   "label": "Release Notes"
+  },
+  {
+   "default": "0",
+   "fieldname": "deprecated",
+   "fieldtype": "Check",
+   "label": "Deprecated"
+  },
+  {
+   "fieldname": "extension",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "extension",
+   "options": "Extension",
+   "reqd": 1
+  },
+  {
+   "fieldname": "checksum_or_signature",
+   "fieldtype": "Data",
+   "label": "Checksum or Signature"
+  },
+  {
+   "fieldname": "source_ref",
+   "fieldtype": "Data",
+   "label": "Source ref"
+  },
+  {
+   "fieldname": "ref_type",
+   "fieldtype": "Select",
+   "label": "Ref type",
+   "options": "\nbranch\ntag\ncommit"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nApproved\nRevoked"
+  },
+  {
+   "fieldname": "install_strategy",
+   "fieldtype": "Select",
+   "label": "Install Strategy",
+   "options": "git_tag\ngit_branch\ngit_commit"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-21 14:28:53.046238",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Extension Version",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

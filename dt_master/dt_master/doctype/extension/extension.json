@@ -1,0 +1,340 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:extension_name",
+ "creation": "2026-01-05 11:54:21.552823",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_identity",
+  "extension_name",
+  "section_app_binding",
+  "app_name",
+  "section_ownership_and_visiblity",
+  "publisher",
+  "visibility",
+  "pricing_model",
+  "section_lifecycle",
+  "status",
+  "section_version_compatibility",
+  "section_marketplace_listing",
+  "title",
+  "short_description",
+  "description",
+  "category",
+  "tags",
+  "icon",
+  "screenshots",
+  "section_install_metadata",
+  "install_type",
+  "requires_restart",
+  "post_install_hook",
+  "pre_install_checks",
+  "supports_uninstall",
+  "supports_upgrade",
+  "section_source_and_versioning",
+  "repository_url",
+  "default_branch",
+  "install_mode",
+  "section_commercial",
+  "price_type",
+  "price_amount",
+  "billing_interval",
+  "trial_days",
+  "requires_subscription",
+  "section_compliance_and_trust",
+  "license",
+  "data_access_level",
+  "external_services",
+  "security_reviewed",
+  "documentation_url",
+  "support_contact"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_identity",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "fieldname": "extension_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Extension Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_app_binding",
+   "fieldtype": "Section Break",
+   "label": "App Binding (critical)"
+  },
+  {
+   "description": "Must match bench app name",
+   "fieldname": "app_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "App Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_ownership_and_visiblity",
+   "fieldtype": "Section Break",
+   "label": "Ownership & Visibility"
+  },
+  {
+   "fieldname": "publisher",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Publisher"
+  },
+  {
+   "fieldname": "visibility",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Visibility",
+   "options": "Public\nPrivate\nInternal"
+  },
+  {
+   "fieldname": "pricing_model",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Pricing Model",
+   "options": "Free\nPaid"
+  },
+  {
+   "fieldname": "section_lifecycle",
+   "fieldtype": "Section Break",
+   "label": "Lifecycle / Approval"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nApproved\nRejected"
+  },
+  {
+   "fieldname": "section_version_compatibility",
+   "fieldtype": "Section Break",
+   "label": "Version Compatibility"
+  },
+  {
+   "description": "What users see when browsing/searching",
+   "fieldname": "section_marketplace_listing",
+   "fieldtype": "Section Break",
+   "label": "Marketplace Listing"
+  },
+  {
+   "description": "Human-friendly display name (can differ from Extension Name)",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "description": "One-line summary (used in cards/search results)",
+   "fieldname": "short_description",
+   "fieldtype": "Small Text",
+   "label": "Short Description"
+  },
+  {
+   "description": "Full description (features, use cases)",
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  },
+  {
+   "description": "e.g. Accounting, HR, Sales, Utilities",
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Marketplace Category"
+  },
+  {
+   "description": "Search & filtering",
+   "fieldname": "tags",
+   "fieldtype": "Data",
+   "label": "Tags"
+  },
+  {
+   "description": "Marketplace tile icon",
+   "fieldname": "icon",
+   "fieldtype": "Attach Image",
+   "label": "Icon"
+  },
+  {
+   "description": "Gallery for listing page",
+   "fieldname": "screenshots",
+   "fieldtype": "Table",
+   "label": "Screenshots",
+   "options": "Extension Screenshot"
+  },
+  {
+   "description": "Decide how the app is installed and behaves",
+   "fieldname": "section_install_metadata",
+   "fieldtype": "Section Break",
+   "label": "Install Metadata"
+  },
+  {
+   "fieldname": "install_type",
+   "fieldtype": "Select",
+   "label": "Install Type",
+   "options": "System App\nTenant App"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_restart",
+   "fieldtype": "Check",
+   "label": "Requires Restart"
+  },
+  {
+   "description": "Python dotted path",
+   "fieldname": "post_install_hook",
+   "fieldtype": "Data",
+   "label": "Post Install Hook"
+  },
+  {
+   "description": "Human-readable constraints (DB, Redis, etc.)",
+   "fieldname": "pre_install_checks",
+   "fieldtype": "Text",
+   "label": "Preinstall Checks"
+  },
+  {
+   "default": "1",
+   "fieldname": "supports_uninstall",
+   "fieldtype": "Check",
+   "label": "Supports Uninstall"
+  },
+  {
+   "default": "1",
+   "fieldname": "supports_upgrade",
+   "fieldtype": "Data",
+   "label": "Supports Upgrade"
+  },
+  {
+   "description": "Let the system fetch and manage versions safely",
+   "fieldname": "section_source_and_versioning",
+   "fieldtype": "Section Break",
+   "label": "Source & Versions"
+  },
+  {
+   "description": "Git repo (GitHub, GitLab, internal)",
+   "fieldname": "repository_url",
+   "fieldtype": "Data",
+   "label": "Repository Url"
+  },
+  {
+   "default": "main",
+   "fieldname": "default_branch",
+   "fieldtype": "Data",
+   "label": "Default Branch"
+  },
+  {
+   "description": "Marketplace monetization",
+   "fieldname": "section_commercial",
+   "fieldtype": "Section Break",
+   "label": "Commercial"
+  },
+  {
+   "fieldname": "price_type",
+   "fieldtype": "Select",
+   "label": "Price Type",
+   "options": "One-time\nSubscription\nUsage-based"
+  },
+  {
+   "fieldname": "price_amount",
+   "fieldtype": "Currency",
+   "label": "Price Amount"
+  },
+  {
+   "fieldname": "billing_interval",
+   "fieldtype": "Select",
+   "label": "Billing Interval",
+   "options": "Monthly\nYearly"
+  },
+  {
+   "fieldname": "trial_days",
+   "fieldtype": "Int",
+   "label": "Trial Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_subscription",
+   "fieldtype": "Check",
+   "label": "Requires Subscription"
+  },
+  {
+   "description": "Admin confidence + enterprise readiness",
+   "fieldname": "section_compliance_and_trust",
+   "fieldtype": "Section Break",
+   "label": "Compliance & Trust"
+  },
+  {
+   "fieldname": "license",
+   "fieldtype": "Select",
+   "label": "License",
+   "options": "MIT\nGPL\nCommercial\nProprietary"
+  },
+  {
+   "fieldname": "data_access_level",
+   "fieldtype": "Select",
+   "label": "Data Access Level",
+   "options": "Read-only\nWrites Data\nAdmin-level"
+  },
+  {
+   "description": "APIs/services used",
+   "fieldname": "external_services",
+   "fieldtype": "Small Text",
+   "label": "External Services"
+  },
+  {
+   "default": "0",
+   "fieldname": "security_reviewed",
+   "fieldtype": "Check",
+   "label": "Security Reviewed"
+  },
+  {
+   "fieldname": "documentation_url",
+   "fieldtype": "Data",
+   "label": "Documentation Url"
+  },
+  {
+   "fieldname": "support_contact",
+   "fieldtype": "Data",
+   "label": "Support Contact"
+  },
+  {
+   "fieldname": "install_mode",
+   "fieldtype": "Select",
+   "label": "Install Mode",
+   "options": "fixed\nrolling"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-21 14:22:58.600141",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Extension",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

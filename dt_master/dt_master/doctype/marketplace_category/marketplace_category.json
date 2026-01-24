@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:category_name",
+ "creation": "2026-01-06 12:56:07.344393",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_identity",
+  "category_name",
+  "section_resentation",
+  "description",
+  "icon",
+  "section_control",
+  "is_active",
+  "sort_order"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_identity",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "description": "Examples: Accounting,HR,Sales,Utilities,Manufacturing",
+   "fieldname": "category_name",
+   "fieldtype": "Data",
+   "label": "Category Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "section_resentation",
+   "fieldtype": "Section Break",
+   "label": "Presentation"
+  },
+  {
+   "description": "Optional marketplace tooltip",
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "description": "Category icon for UI",
+   "fieldname": "icon",
+   "fieldtype": "Attach Image",
+   "label": "Icon"
+  },
+  {
+   "fieldname": "section_control",
+   "fieldtype": "Section Break",
+   "label": "Control"
+  },
+  {
+   "default": "1",
+   "description": "Soft-disable categories without breaking links",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Active"
+  },
+  {
+   "description": "Marketplace ordering",
+   "fieldname": "sort_order",
+   "fieldtype": "Int",
+   "label": "Sort Order"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-06 13:02:20.813233",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Marketplace Category",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

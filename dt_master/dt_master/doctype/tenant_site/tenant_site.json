@@ -1,0 +1,327 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:site_name",
+ "creation": "2025-12-17 21:50:35.861684",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "site_identity_section",
+  "site_name",
+  "domain_type",
+  "protocol",
+  "port",
+  "fqdn",
+  "status",
+  "automation_state",
+  "create_site",
+  "install_apps",
+  "verify_site",
+  "configure_proxy",
+  "suspend_site",
+  "resume_site",
+  "destroy_site",
+  "ownership_and_subscription",
+  "customer",
+  "subscription",
+  "infrastructure_profile",
+  "tenant_api_user",
+  "tenant_api_key",
+  "tenant_api_secret",
+  "admin_password",
+  "mysql_root_user_name",
+  "mysql_root_user_password",
+  "hosting_section",
+  "node",
+  "deployment_type",
+  "region",
+  "provisioning_stage",
+  "erpnext_runtime_section",
+  "erpnext_version",
+  "database_name",
+  "installed_apps",
+  "dates_and_automation",
+  "created_on",
+  "auto_provisioned",
+  "last_health_check",
+  "automation_logs"
+ ],
+ "fields": [
+  {
+   "fieldname": "site_identity_section",
+   "fieldtype": "Section Break",
+   "label": "Site Identity"
+  },
+  {
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Site Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "domain_type",
+   "fieldtype": "Select",
+   "label": "Domain Type",
+   "options": "Subdomain\nCustom Domain"
+  },
+  {
+   "fieldname": "fqdn",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Fully Qualified Domain",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Requested\nProvisioning\nActive\nSuspended\nArchived"
+  },
+  {
+   "fieldname": "ownership_and_subscription",
+   "fieldtype": "Section Break",
+   "label": "Ownership & Subscription"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "subscription",
+   "fieldtype": "Link",
+   "label": "Subscription",
+   "options": "Subscription"
+  },
+  {
+   "fieldname": "infrastructure_profile",
+   "fieldtype": "Link",
+   "label": "Infrastructure Profile",
+   "options": "Infrastructure Profile"
+  },
+  {
+   "fieldname": "hosting_section",
+   "fieldtype": "Section Break",
+   "label": "Hosting"
+  },
+  {
+   "fieldname": "node",
+   "fieldtype": "Link",
+   "label": "Infrastructure Node",
+   "options": "Infrastructure Node"
+  },
+  {
+   "fieldname": "deployment_type",
+   "fieldtype": "Select",
+   "label": "Deployment Type",
+   "options": "Shared\nDedicated"
+  },
+  {
+   "description": "Free text",
+   "fieldname": "region",
+   "fieldtype": "Data",
+   "label": "Region"
+  },
+  {
+   "fieldname": "erpnext_runtime_section",
+   "fieldtype": "Section Break",
+   "label": "ERPNext Runtime"
+  },
+  {
+   "fieldname": "erpnext_version",
+   "fieldtype": "Data",
+   "label": "ERPNext Version"
+  },
+  {
+   "fieldname": "database_name",
+   "fieldtype": "Data",
+   "label": "Database Name"
+  },
+  {
+   "fieldname": "installed_apps",
+   "fieldtype": "Table",
+   "label": "Installed Apps",
+   "options": "Tenant Installed App"
+  },
+  {
+   "fieldname": "dates_and_automation",
+   "fieldtype": "Section Break",
+   "label": "Dates & Automation"
+  },
+  {
+   "fieldname": "created_on",
+   "fieldtype": "Datetime",
+   "label": "Created On"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_provisioned",
+   "fieldtype": "Check",
+   "label": "Auto Provisioned"
+  },
+  {
+   "fieldname": "last_health_check",
+   "fieldtype": "Datetime",
+   "label": "Last Health Check"
+  },
+  {
+   "depends_on": "eval:doc.status == \"Provisioning\";",
+   "fieldname": "provisioning_stage",
+   "fieldtype": "Select",
+   "label": "Provisioning Stage",
+   "options": "DNS\nRuntime\nDatabase\nSite\nApps\nVerification"
+  },
+  {
+   "fieldname": "tenant_api_user",
+   "fieldtype": "Data",
+   "label": "Tenant API User"
+  },
+  {
+   "fieldname": "tenant_api_key",
+   "fieldtype": "Data",
+   "label": "Tenant API Key"
+  },
+  {
+   "fieldname": "tenant_api_secret",
+   "fieldtype": "Data",
+   "label": "Tenant API Secret"
+  },
+  {
+   "fieldname": "protocol",
+   "fieldtype": "Select",
+   "label": "Protocol",
+   "options": "http\nhttps"
+  },
+  {
+   "fieldname": "port",
+   "fieldtype": "Data",
+   "label": "Port"
+  },
+  {
+   "fieldname": "automation_state",
+   "fieldtype": "Select",
+   "label": "State",
+   "options": "idle\nqueued\ncreating_site\ninstalling_apps\nconfiguring_nginx\nverifying\nready\nsuspending\nresuming\narchiving\ndestroying\nfailed"
+  },
+  {
+   "fieldname": "admin_password",
+   "fieldtype": "Data",
+   "label": "Admin Password"
+  },
+  {
+   "fieldname": "mysql_root_user_name",
+   "fieldtype": "Data",
+   "label": "MSQL Root User Name"
+  },
+  {
+   "fieldname": "mysql_root_user_password",
+   "fieldtype": "Data",
+   "label": "MSQL Root User Password"
+  },
+  {
+   "button_color": "Primary",
+   "fieldname": "create_site",
+   "fieldtype": "Button",
+   "label": "Create Site"
+  },
+  {
+   "button_color": "Info",
+   "fieldname": "install_apps",
+   "fieldtype": "Button",
+   "label": "Install Apps"
+  },
+  {
+   "button_color": "Success",
+   "fieldname": "verify_site",
+   "fieldtype": "Button",
+   "label": "Verify Site"
+  },
+  {
+   "button_color": "Warning",
+   "fieldname": "suspend_site",
+   "fieldtype": "Button",
+   "label": "Suspend Site"
+  },
+  {
+   "button_color": "Success",
+   "fieldname": "resume_site",
+   "fieldtype": "Button",
+   "label": "Resume Site"
+  },
+  {
+   "button_color": "Danger",
+   "fieldname": "destroy_site",
+   "fieldtype": "Button",
+   "label": "Destroy Site"
+  },
+  {
+   "fieldname": "automation_logs",
+   "fieldtype": "Table",
+   "label": "Logs",
+   "options": "Node Action Log"
+  },
+  {
+   "button_color": "Info",
+   "fieldname": "configure_proxy",
+   "fieldtype": "Button",
+   "label": "Configure Proxy"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-05 15:47:54.978818",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Tenant Site",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Green",
+   "custom": 1,
+   "title": "Active"
+  },
+  {
+   "color": "Orange",
+   "custom": 1,
+   "title": "Suspended"
+  },
+  {
+   "color": "Gray",
+   "custom": 1,
+   "title": "Archived"
+  },
+  {
+   "color": "Blue",
+   "custom": 1,
+   "title": "Provisioning"
+  },
+  {
+   "color": "Yellow",
+   "custom": 1,
+   "title": "Requested"
+  }
+ ]
+}
