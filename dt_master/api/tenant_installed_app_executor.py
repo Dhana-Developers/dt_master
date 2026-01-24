@@ -166,6 +166,7 @@ def _execute_ssh_script(node, tenant, app_row, script_name):
         f"export SOURCE_REF='{extension_version.source_ref if extension_version else ''}'; "
         f"export REF_TYPE='{extension_version.ref_type if extension_version else ''}'; "
         f"export REPOSITORY_URL='{extension.repository_url if extension else ''}'; "
+        f"export FRAPPE_HOME='/home/frappe'; "
     )
 
     remote_cmd = f"{env} bash {SCRIPTS_BASE_DIR}{script_name}"
@@ -368,7 +369,18 @@ def _handle_mutating_result(tenant, app_row, action_def, result):
         app_row.status = action_def["failure_status"]
         app_row.last_action_status = "Failed"
         app_row.last_error = result["error"]
-
+    parsed = _parse_kv_output(result["stdout"])
+    app_row.target_version = parsed.get("latest_minor_version") or app_row.target_version
+    app_row.status = (
+        "Installed" if parsed.get("installed") == "true" else "Uninstalled"
+    )
+    app_row.installed_version = (
+        parsed.get("installed_version") or app_row.installed_version
+    )
+    app_row.git_branch = parsed.get("git_branch")
+    app_row.git_commit = parsed.get("git_commit")
+    app_row.git_dirty = parsed.get("dirty") == "true"
+    app_row.git_head_state = parsed.get("git_head_state")
     app_row.last_updated = now_datetime()
     tenant.save(ignore_permissions=True)
     frappe.db.commit()
@@ -413,7 +425,7 @@ def downgrade_app(tenant_name, row_name):
 
 @frappe.whitelist()
 def reinstall_app(tenant_name, row_name):
-    return _run_app_action(tenant_name, row_name, "reinstall")
+    return _run_app_action(tenant_name, row_name, "install")
 
 @frappe.whitelist()
 def uninstall_app(tenant_name, row_name):

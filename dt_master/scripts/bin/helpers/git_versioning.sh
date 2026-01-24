@@ -41,33 +41,25 @@ require_branch() {
     fi
 }
 
-# ------------------------------------------------------------
-# Repository detection
-# ------------------------------------------------------------
 detect_repo_name() {
-    # Try remote URL first
-    local remote url
-    remote="${REMOTE_NAME:-origin}"
-
+    local remote="${REMOTE_NAME:-origin}"
     if url="$(git remote get-url "$remote" 2>/dev/null)"; then
         basename "${url%.git}"
         return 0
     fi
-
-    # Fallback: directory name
     basename "$(pwd)"
 }
 
 # ------------------------------------------------------------
-# Inputs (env or interactive)
+# Inputs
 # ------------------------------------------------------------
 REPO_NAME="${REPO_NAME:-$(detect_repo_name || true)}"
-prompt_if_empty REPO_NAME "Enter repository name"
+prompt_if_empty REPO_NAME "Repository name"
 
-prompt_if_empty DEVELOP_BRANCH "Enter develop branch name (e.g. develop)"
-prompt_if_empty VERSION_BRANCH "Enter version branch (e.g. version-1)"
-prompt_if_empty RELEASE_VERSION "Enter release tag (e.g. v1.1.0)"
-prompt_if_empty RELEASE_MESSAGE "Enter release message"
+prompt_if_empty DEVELOP_BRANCH "Develop branch (e.g. develop)"
+prompt_if_empty VERSION_BRANCH "Production branch (e.g. version-1)"
+prompt_if_empty RELEASE_VERSION "Release tag (e.g. v1.2.1)"
+prompt_if_empty RELEASE_MESSAGE "Release message"
 
 REMOTE_NAME="${REMOTE_NAME:-origin}"
 
@@ -77,42 +69,41 @@ REMOTE_NAME="${REMOTE_NAME:-origin}"
 require_clean_worktree
 require_branch "$DEVELOP_BRANCH"
 
-# ------------------------------------------------------------
-# Create annotated tag
-# ------------------------------------------------------------
 if git rev-parse "$RELEASE_VERSION" >/dev/null 2>&1; then
     echo "error=tag_already_exists tag=$RELEASE_VERSION"
     exit 1
 fi
 
-echo "== [$REPO_NAME] Tagging release $RELEASE_VERSION =="
+# ------------------------------------------------------------
+# Create release tag (from develop HEAD)
+# ------------------------------------------------------------
+echo "== [$REPO_NAME] Creating release $RELEASE_VERSION from $DEVELOP_BRANCH =="
+
 git tag -a "$RELEASE_VERSION" -m "$RELEASE_MESSAGE"
 
 # ------------------------------------------------------------
-# Update version branch (fast-forward only)
+# Update production branch to point to tag (FF-only)
 # ------------------------------------------------------------
-echo "== [$REPO_NAME] Updating $VERSION_BRANCH =="
+echo "== [$REPO_NAME] Promoting $RELEASE_VERSION to $VERSION_BRANCH =="
 
 if git show-ref --verify --quiet "refs/heads/$VERSION_BRANCH"; then
     git checkout "$VERSION_BRANCH"
+    git merge --ff-only "$RELEASE_VERSION"
 else
-    echo "info=creating_version_branch branch=$VERSION_BRANCH"
+    echo "info=creating_production_branch branch=$VERSION_BRANCH"
     git checkout -b "$VERSION_BRANCH" "$RELEASE_VERSION"
 fi
 
-git merge --ff-only "$RELEASE_VERSION"
-
 # ------------------------------------------------------------
-# Push
+# Push: tag + production head
 # ------------------------------------------------------------
-echo "== [$REPO_NAME] Pushing to $REMOTE_NAME =="
+echo "== [$REPO_NAME] Pushing release =="
 git push "$REMOTE_NAME" "$RELEASE_VERSION"
 git push "$REMOTE_NAME" "$VERSION_BRANCH"
 
 # ------------------------------------------------------------
-# Restore develop branch (authoring context)
+# Restore develop branch
 # ------------------------------------------------------------
-echo "== [$REPO_NAME] Restoring develop branch =="
 git checkout "$DEVELOP_BRANCH"
 
 # ------------------------------------------------------------
@@ -121,5 +112,6 @@ git checkout "$DEVELOP_BRANCH"
 echo "status=release_complete"
 echo "repo_name=$REPO_NAME"
 echo "release_tag=$RELEASE_VERSION"
-echo "version_branch=$VERSION_BRANCH"
+echo "production_branch=$VERSION_BRANCH"
+echo "develop_branch=$DEVELOP_BRANCH"
 echo "remote=$REMOTE_NAME"

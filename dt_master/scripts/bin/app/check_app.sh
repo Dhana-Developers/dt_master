@@ -36,7 +36,9 @@ if [[ -d "$APP_DIR" ]]; then
     INSTALLED="true"
 
     if run_as_frappe git -C "$APP_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        GIT_COMMIT="$(run_as_frappe git -C "$APP_DIR" rev-parse --short HEAD)"
+        GIT_COMMIT="$(
+            run_as_frappe git -C "$APP_DIR" rev-parse --short HEAD 2>/dev/null || true
+        )"
 
         if run_as_frappe git -C "$APP_DIR" status --porcelain | grep -q .; then
             DIRTY="true"
@@ -46,17 +48,21 @@ if [[ -d "$APP_DIR" ]]; then
 
         if run_as_frappe git -C "$APP_DIR" symbolic-ref -q HEAD >/dev/null 2>&1; then
             HEAD_STATE="branch"
-            GIT_BRANCH="$(run_as_frappe git -C "$APP_DIR" branch --show-current)"
+            GIT_BRANCH="$(
+                run_as_frappe git -C "$APP_DIR" branch --show-current 2>/dev/null || true
+            )"
             GIT_REF="$GIT_BRANCH"
-
         else
             HEAD_STATE="detached"
-            GIT_TAG="$(run_as_frappe git -C "$APP_DIR" describe --tags --exact-match 2>/dev/null || true)"
+            GIT_TAG="$(
+                run_as_frappe git -C "$APP_DIR" describe --tags --exact-match 2>/dev/null || true
+            )"
             GIT_REF="${GIT_TAG:-detached}"
         fi
     else
         HEAD_STATE="no-git"
     fi
+
 fi
 
 # ------------------------------------------------------------
