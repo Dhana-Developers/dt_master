@@ -6,19 +6,90 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_break_rmcv"
+  "action_name",
+  "action_type",
+  "triggered_by",
+  "started_at",
+  "finished_at",
+  "exit_code",
+  "stdout",
+  "stderr",
+  "state_before",
+  "state_after",
+  "result",
+  "state"
  ],
  "fields": [
   {
-   "fieldname": "section_break_rmcv",
-   "fieldtype": "Section Break"
+   "fieldname": "action_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Action Name"
+  },
+  {
+   "fieldname": "action_type",
+   "fieldtype": "Data",
+   "label": "Action Type"
+  },
+  {
+   "fieldname": "triggered_by",
+   "fieldtype": "Data",
+   "label": "Triggered By"
+  },
+  {
+   "fieldname": "started_at",
+   "fieldtype": "Datetime",
+   "label": "Started At"
+  },
+  {
+   "fieldname": "finished_at",
+   "fieldtype": "Datetime",
+   "label": "Finished At"
+  },
+  {
+   "default": "0",
+   "fieldname": "exit_code",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Exit Code"
+  },
+  {
+   "fieldname": "stdout",
+   "fieldtype": "Long Text",
+   "label": "Stdout"
+  },
+  {
+   "fieldname": "stderr",
+   "fieldtype": "Long Text",
+   "label": "Stderr"
+  },
+  {
+   "fieldname": "result",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Result"
+  },
+  {
+   "fieldname": "state_before",
+   "fieldtype": "Data",
+   "label": "Node State Before"
+  },
+  {
+   "fieldname": "state_after",
+   "fieldtype": "Data",
+   "label": "Node State After"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-19 11:16:02.906877",
+ "modified": "2026-02-22 11:19:52.750088",
  "modified_by": "Administrator",
  "module": "Dt Master",
  "name": "Node Action Log",

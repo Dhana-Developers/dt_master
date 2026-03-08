@@ -1,0 +1,100 @@
+{
+ "app": "dt_master",
+ "charts": [
+  {
+   "chart_name": "Tenants",
+   "label": "Tenants Aquisition"
+  }
+ ],
+ "content": "[{\"id\":\"header_master\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">NDF Tech Labs</span>\",\"col\":12}},{\"id\":\"EltsYoCd7h\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Aquired Tenants\",\"col\":4}},{\"id\":\"aURGU6sbqz\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Tenants Aquisition\",\"col\":12}},{\"id\":\"d4EAU9CHBD\",\"type\":\"card\",\"data\":{\"card_name\":\"Quick Links\",\"col\":4}}]",
+ "creation": "2026-02-20 07:52:36.110014",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "layout-dashboard",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Master",
+ "link_type": "DocType",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quick Links",
+   "link_count": 5,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Profiles",
+   "link_count": 0,
+   "link_to": "Infrastructure Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Providers",
+   "link_count": 0,
+   "link_to": "Infrastructure Provider",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Nodes",
+   "link_count": 0,
+   "link_to": "Infrastructure Node",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenants",
+   "link_count": 0,
+   "link_to": "Tenant Site",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Extentions",
+   "link_count": 0,
+   "link_to": "Extension",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-02-20 09:58:38.590506",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Master",
+ "number_cards": [
+  {
+   "label": "Aquired Tenants",
+   "number_card_name": "Total Tenants"
+  }
+ ],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 0.0,
+ "shortcuts": [],
+ "title": "Master",
+ "type": "Workspace"
+}

@@ -1,6 +1,7 @@
 import subprocess
 import shlex
 
+import requests
 import frappe
 from frappe.utils import now_datetime
 
@@ -393,20 +394,114 @@ def _handle_mutating_result(tenant, app_row, action_def, result):
 # ---------------------------------------------------------------------
 # MAIN ORCHESTRATOR
 # ---------------------------------------------------------------------
+# def _run_app_action(tenant_name, row_name, action):
+#     tenant, app_row, node = _load_action_context(tenant_name, row_name)
+#     action_def = _validate_action(app_row, action)
+
+#     _mark_action_running(tenant, app_row, action)
+
+#     result = _execute_action(
+#         node, tenant, app_row, action_def["script"]
+#     )
+#     if action_def.get("readonly"):
+#         return _handle_readonly_result(tenant, app_row, result,action)
+
+#     return _handle_mutating_result(tenant, app_row, action_def, result)
+
 def _run_app_action(tenant_name, row_name, action):
+
     tenant, app_row, node = _load_action_context(tenant_name, row_name)
     action_def = _validate_action(app_row, action)
 
-    _mark_action_running(tenant, app_row, action)
+    try:
+        _mark_action_running(tenant, app_row, action)
 
-    result = _execute_action(
-        node, tenant, app_row, action_def["script"]
-    )
-    print(result)
-    if action_def.get("readonly"):
-        return _handle_readonly_result(tenant, app_row, result,action)
+        publish_install_event(tenant, app_row)
 
-    return _handle_mutating_result(tenant, app_row, action_def, result)
+        result = _execute_action(
+            node, tenant, app_row, action_def["script"]
+        )
+
+        if action_def.get("readonly"):
+            output = _handle_readonly_result(tenant, app_row, result, action)
+        else:
+            output = _handle_mutating_result(tenant, app_row, action_def, result)
+
+        publish_install_event(tenant, app_row)
+
+        return output
+
+    except Exception:
+
+        # capture traceback
+        error = frappe.get_traceback()
+
+        app_row.status = "Failed"
+        app_row.last_action_status = "Failed"
+        app_row.last_error = error
+        app_row.last_updated = now_datetime()
+
+        tenant.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        frappe.log_error(
+            title="Extension Executor Failed",
+            message=error
+        )
+
+        publish_install_event(tenant, app_row)
+
+        raise
+
+def tenant_base_url(tenant):
+    protocol = (tenant.protocol or "https").lower().replace("://", "")
+    port = tenant.port
+
+    if port:
+        return f"{protocol}://{tenant.fqdn}:{port}"
+    return f"{protocol}://{tenant.fqdn}"
+
+def _tenant_api_call(tenant, path, data=None):
+
+    url = tenant_base_url(tenant) + path
+
+    headers = {
+        "Authorization": f"token {tenant.tenant_api_key}:{tenant.tenant_api_secret}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        r = requests.post(url, json=data or {}, headers=headers, timeout=10)
+        r.raise_for_status()
+        return r.json()
+    except requests.RequestException:
+        frappe.log_error(
+            frappe.get_traceback(),
+            f"Tenant API call failed: {url}"
+        )
+        return None
+
+def publish_install_event(tenant, app_row):
+
+    data = {
+        "extension": app_row.extension,
+        "status": app_row.status,
+        "action_status": app_row.last_action_status,
+        "error": app_row.last_error,
+        "site": tenant.fqdn
+    }
+
+    try:
+        _tenant_api_call(
+            tenant,
+            "/api/method/dt_tenant.api.marketplace.publish_install_update",
+            data
+        )
+    except Exception:
+        frappe.log_error(
+            frappe.get_traceback(),
+            "Tenant realtime publish failed"
+        )
 
 # ---------------------------------------------------------------------
 # FRAPPE WHITELISTED FUNCTIONS

@@ -1,0 +1,255 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:profile_name",
+ "creation": "2026-03-07 12:13:15.292387",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_core_identity_fields",
+  "profile",
+  "profile_name",
+  "active",
+  "description",
+  "compute",
+  "cpu_cores",
+  "cpu_quota_percent",
+  "cpu_shares",
+  "section_break_memory",
+  "ram_gb",
+  "ram_reservation_gb",
+  "swap_limit_gb",
+  "section_break_disk",
+  "storage_gb",
+  "database_storage_gb",
+  "backup_storage_gb",
+  "section_break_workers",
+  "web_workers",
+  "background_workers",
+  "scheduler_workers",
+  "section_breack_database_safety",
+  "max_connections",
+  "query_timeout_seconds",
+  "max_query_memory_mb",
+  "section_break_protection_limits",
+  "max_users",
+  "max_api_requests_per_minute",
+  "max_background_jobs",
+  "max_file_upload_mb",
+  "section_break_infrastructure",
+  "container_image",
+  "container_template",
+  "node_selector",
+  "deployment_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_core_identity_fields",
+   "fieldtype": "Section Break",
+   "label": "Core Identity Fields"
+  },
+  {
+   "fieldname": "profile",
+   "fieldtype": "Link",
+   "label": "Profile",
+   "options": "Capability Profile"
+  },
+  {
+   "fieldname": "profile_name",
+   "fieldtype": "Data",
+   "label": "Profile Name",
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "label": "Active",
+   "options": "0"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "compute",
+   "fieldtype": "Section Break",
+   "label": "Compute"
+  },
+  {
+   "fieldname": "cpu_cores",
+   "fieldtype": "Float",
+   "label": "CPU Cores"
+  },
+  {
+   "fieldname": "cpu_quota_percent",
+   "fieldtype": "Int",
+   "label": "CPU Quota Percent "
+  },
+  {
+   "fieldname": "cpu_shares",
+   "fieldtype": "Int",
+   "label": "CPU Shares"
+  },
+  {
+   "fieldname": "section_break_memory",
+   "fieldtype": "Section Break",
+   "label": "Memory"
+  },
+  {
+   "fieldname": "ram_gb",
+   "fieldtype": "Float",
+   "label": "RAM (GB)"
+  },
+  {
+   "fieldname": "ram_reservation_gb",
+   "fieldtype": "Float",
+   "label": "RAM Reservation (GB)"
+  },
+  {
+   "fieldname": "swap_limit_gb",
+   "fieldtype": "Float",
+   "label": "SWAP Limit (GB)"
+  },
+  {
+   "fieldname": "section_break_disk",
+   "fieldtype": "Section Break",
+   "label": "Disk"
+  },
+  {
+   "fieldname": "storage_gb",
+   "fieldtype": "Float",
+   "label": "Storage (GB)"
+  },
+  {
+   "fieldname": "database_storage_gb",
+   "fieldtype": "Float",
+   "label": "Database storage (GB)"
+  },
+  {
+   "fieldname": "backup_storage_gb",
+   "fieldtype": "Float",
+   "label": "Backuo storage(GB)"
+  },
+  {
+   "fieldname": "section_break_workers",
+   "fieldtype": "Section Break",
+   "label": "Workers"
+  },
+  {
+   "fieldname": "web_workers",
+   "fieldtype": "Int",
+   "label": "Web workers"
+  },
+  {
+   "fieldname": "background_workers",
+   "fieldtype": "Int",
+   "label": "Background workers"
+  },
+  {
+   "fieldname": "scheduler_workers",
+   "fieldtype": "Data",
+   "label": "Schedular workers"
+  },
+  {
+   "fieldname": "section_breack_database_safety",
+   "fieldtype": "Section Break",
+   "label": "Database Safety"
+  },
+  {
+   "fieldname": "max_connections",
+   "fieldtype": "Int",
+   "label": "Max connections"
+  },
+  {
+   "fieldname": "query_timeout_seconds",
+   "fieldtype": "Int",
+   "label": "Query timeout (Seconds)"
+  },
+  {
+   "fieldname": "max_query_memory_mb",
+   "fieldtype": "Int",
+   "label": "Max query memory (MB)"
+  },
+  {
+   "fieldname": "section_break_protection_limits",
+   "fieldtype": "Section Break",
+   "label": "Protection Limits"
+  },
+  {
+   "fieldname": "max_users",
+   "fieldtype": "Int",
+   "label": "Max users"
+  },
+  {
+   "fieldname": "max_api_requests_per_minute",
+   "fieldtype": "Int",
+   "label": "Max API request per minute"
+  },
+  {
+   "fieldname": "max_background_jobs",
+   "fieldtype": "Int",
+   "label": "Max background jobs"
+  },
+  {
+   "fieldname": "max_file_upload_mb",
+   "fieldtype": "Int",
+   "label": "Max file upload (MB)"
+  },
+  {
+   "fieldname": "section_break_infrastructure",
+   "fieldtype": "Section Break",
+   "label": "Infrastructure"
+  },
+  {
+   "fieldname": "container_image",
+   "fieldtype": "Data",
+   "label": "Container image"
+  },
+  {
+   "fieldname": "container_template",
+   "fieldtype": "Data",
+   "label": "Container template"
+  },
+  {
+   "fieldname": "node_selector",
+   "fieldtype": "Data",
+   "label": "Node Selector"
+  },
+  {
+   "fieldname": "deployment_type",
+   "fieldtype": "Select",
+   "label": "Deployment type",
+   "options": "Shared\nDedicated\nHybrid"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-07 12:41:04.268036",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Machine Constraint",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
