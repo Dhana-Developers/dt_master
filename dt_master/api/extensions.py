@@ -15,6 +15,8 @@ def get_extensions(tab=None, limit=12, offset=0, fqdn=None, frappe_major=None, f
     frappe_minor = int(frappe_minor) if frappe_minor else None
     frappe_patch = int(frappe_patch) if frappe_patch else None
 
+    tenant_version = (frappe_major, frappe_minor, frappe_patch)
+
     filters = {"status": "Approved"}
 
     extensions = frappe.get_all(
@@ -82,19 +84,12 @@ def get_extensions(tab=None, limit=12, offset=0, fqdn=None, frappe_major=None, f
 
         for v in versions:
 
-            min_v = int(v.frappe_min.split(".")[0]) if v.frappe_min else None
-            max_v = int(v.frappe_max.split(".")[0]) if v.frappe_max else None
+            min_v = version_tuple(v.frappe_min) if v.frappe_min else None
+            max_v = version_tuple(v.frappe_max) if v.frappe_max else None
 
-            if frappe_major:
-
-                if min_v and frappe_major < min_v:
-                    continue
-
-                if max_v and frappe_major > max_v:
-                    continue
-
-            latest_version = v
-            break
+            if (not min_v or tenant_version >= min_v) and (not max_v or tenant_version <= max_v):
+                latest_version = v
+                break
 
         # IMPORTANT
         if not latest_version:
