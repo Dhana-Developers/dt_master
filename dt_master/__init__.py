@@ -1,1 +1,1 @@
-__version__ = "0.1.1" # fix: Extension Version specific for certain frappe version
+__version__ = "0.2.0" # feat: Add payment gateways to enable transactions
