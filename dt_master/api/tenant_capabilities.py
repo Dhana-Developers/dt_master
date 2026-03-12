@@ -5,7 +5,6 @@ def get_tenant_capabilities(fqdn):
 
     fqdn = fqdn.split(":")[0]
 
-    # 1. Resolve tenant
     tenant = frappe.get_value(
         "Tenant Site",
         {
@@ -19,16 +18,13 @@ def get_tenant_capabilities(fqdn):
     if not tenant:
         frappe.throw("Invalid or inactive tenant")
 
-    # 2. Load subscription
     subscription = frappe.get_doc("Subscription", tenant.subscription)
 
     if not subscription.plans:
         frappe.throw("Subscription has no plans")
 
-    # 3. Pick primary plan
     plan_name = subscription.plans[0].plan
 
-    # 4. Resolve capability profile
     profile_name = frappe.get_value(
         "Capability Profile",
         {"subscription_plan": plan_name},
@@ -40,7 +36,6 @@ def get_tenant_capabilities(fqdn):
 
     profile = frappe.get_doc("Capability Profile", profile_name)
 
-    # 5. Machine constraint
     machine = frappe.get_value(
         "Machine Constraint",
         {
@@ -51,18 +46,26 @@ def get_tenant_capabilities(fqdn):
         as_dict=True
     )
 
-    # 6. Base response (unchanged variables)
+    # --- Resolve trial and end dates properly ---
+
+    trial_end = getattr(subscription, "trial_end_date", None)
+
+    # active billing period end
+    period_end = getattr(subscription, "current_invoice_start", None)
+
+    # fallback if subscription has fixed end
+    end_date = getattr(subscription, "end_date", None) or period_end
+
     response = {
         "subscription_status": subscription.status,
-        "trial_period_end": subscription.trial_period_end,
-        "end_date": subscription.end_date,
+        "trial_period_end": trial_end,
+        "end_date": end_date,
         "subscription_plan": plan_name,
         "capability_profile": profile.name,
         "allowed_roles": [r.role for r in profile.allowed_roles],
         "allowed_modules": [m.module for m in profile.allowed_modules],
     }
 
-    # 7. Machine properties dictionary
     if machine:
         response["machine_properties"] = {
             "cpu_cores": machine.cpu_cores,

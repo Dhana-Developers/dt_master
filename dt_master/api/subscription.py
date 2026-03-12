@@ -8,11 +8,13 @@ def get_available_plans(limit=12, offset=0):
         fields=[
             "name",
             "plan_name",
-            "cost",
+            "item",
             "currency",
+            "price_list",
             "billing_interval",
             "billing_interval_count",
-            "price_determination"
+            "price_determination",
+            "cost"
         ],
         limit=limit,
         start=offset,
@@ -22,6 +24,25 @@ def get_available_plans(limit=12, offset=0):
     result = []
 
     for plan in plans:
+
+        price = None
+
+        if plan.price_determination == "Based On Price List":
+            price = frappe.get_value(
+                "Item Price",
+                {
+                    "item_code": plan.item,
+                    "price_list": plan.price_list,
+                    "selling": 1
+                },
+                "price_list_rate"
+            )
+
+        elif plan.price_determination == "Fixed Rate":
+            price = plan.cost
+
+        elif plan.price_determination == "Monthly Rate":
+            price = plan.cost
 
         profile = frappe.get_doc(
             "Capability Profile",
@@ -58,7 +79,14 @@ def get_available_plans(limit=12, offset=0):
             )
 
         result.append({
-            "plan": plan,
+            "plan": {
+                "name": plan.name,
+                "plan_name": plan.plan_name,
+                "cost": price,
+                "currency": plan.currency,
+                "billing_interval": plan.billing_interval,
+                "billing_interval_count": plan.billing_interval_count
+            },
             "capability_profile": {
                 "name": profile.name if profile else None,
                 "profile_name": profile.profile_name if profile else None,
