@@ -37,13 +37,100 @@ log "Starting site setup: $SITE_NAME"
 log "Using Frappe upstream port: $FRAPPE_UPSTREAM_PORT"
 
 # -------------------------------------------------
+# Ensure MariaDB user exists (NEW SAFETY STEP)
+# -------------------------------------------------
+ensure_db_user() {
+
+  log "Ensuring MariaDB user '${MYSQL_ROOT_USER}'@'localhost' exists"
+
+  USER_EXISTS=$(mysql -N -s -e "
+    SELECT EXISTS(
+      SELECT 1
+      FROM mysql.user
+      WHERE user='${MYSQL_ROOT_USER}'
+      AND host='localhost'
+    );
+  ")
+
+  if [ "$USER_EXISTS" = "1" ]; then
+    log "MariaDB user '${MYSQL_ROOT_USER}'@'localhost' already exists"
+  else
+    log "Creating MariaDB user '${MYSQL_ROOT_USER}'@'localhost'"
+
+    mysql <<SQL
+CREATE USER IF NOT EXISTS '${MYSQL_ROOT_USER}'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_ROOT_USER}'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+SQL
+
+    log "MariaDB user '${MYSQL_ROOT_USER}'@'localhost' created"
+  fi
+}
+
+ensure_db_user
+
+# -------------------------------------------------
 # Idempotency check (DO NOT EXIT SCRIPT)
 # -------------------------------------------------
+repair_partial_site() {
+
+  log "Repairing partial site installation"
+
+  rm -rf "$BENCH_DIR/sites/$SITE_NAME"
+
+  mysql <<SQL
+DROP DATABASE IF EXISTS \`$DB_NAME\`;
+DROP USER IF EXISTS '$DB_NAME'@'localhost';
+FLUSH PRIVILEGES;
+SQL
+
+  log "Partial site removed — clean installation will proceed"
+}
+
+check_partial_site() {
+
+  SITE_PATH="$BENCH_DIR/sites/$SITE_NAME"
+  SITE_CONFIG="$SITE_PATH/site_config.json"
+
+  if [ ! -d "$SITE_PATH" ]; then
+    return 1
+  fi
+
+  if [ ! -f "$SITE_CONFIG" ]; then
+    log "Site config missing — partial installation detected"
+    return 0
+  fi
+
+  DB_USER=$(jq -r '.db_user // empty' "$SITE_CONFIG")
+  DB_PASS=$(jq -r '.db_password // empty' "$SITE_CONFIG")
+  DB_NAME_LOCAL=$(jq -r '.db_name // empty' "$SITE_CONFIG")
+
+  if [ -z "$DB_USER" ] || [ -z "$DB_NAME_LOCAL" ]; then
+    log "DB credentials missing in site_config.json"
+    return 0
+  fi
+
+  if ! mysql -u"$DB_USER" -p"$DB_PASS" -e "USE \`$DB_NAME_LOCAL\`;" >/dev/null 2>&1; then
+    log "Database authentication failed — partial site detected"
+    return 0
+  fi
+
+  return 1
+}
+
 CREATE_SITE=1
 
 if site_exists; then
-  log "Site already exists — skipping creation"
-  CREATE_SITE=0
+
+  if check_partial_site; then
+    log "Partial site installation detected"
+    repair_partial_site
+    CREATE_SITE=1
+  else
+    log "Site already exists and is healthy"
+    CREATE_SITE=0
+  fi
+
 fi
 
 # -------------------------------------------------

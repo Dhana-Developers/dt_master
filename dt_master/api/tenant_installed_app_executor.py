@@ -131,6 +131,12 @@ def _mark_action_running(tenant, app_row, action):
 def _execute_ssh_script(node, tenant, app_row, script_name):
     ssh = _get_ssh_config(node)
 
+    if not node.scripts_base_dir:
+        frappe.throw("Scripts base directory not configured on node")
+
+    SCRIPTS_BASE_DIR = f"{node.scripts_base_dir}/bin/app/"
+    SCRIPT_LIB_DIR = f"{node.scripts_base_dir}/lib/"
+
     extension_version = None
     extension = None
 
@@ -170,7 +176,10 @@ def _execute_ssh_script(node, tenant, app_row, script_name):
         f"export FRAPPE_HOME='/home/frappe'; "
     )
 
-    remote_cmd = f"{env} bash {SCRIPTS_BASE_DIR}{script_name}"
+    remote_cmd = (
+        f"sudo -n bash -c "
+        f"{shlex.quote(env + f'bash {SCRIPTS_BASE_DIR}{script_name}')}"
+    )
 
     ssh_command = (
         f"ssh -p {ssh['port']} "

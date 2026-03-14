@@ -36,7 +36,7 @@ else
 fi
 
 # -------------------------------------------------
-# Logging (root-owned by design)
+# Logging
 # -------------------------------------------------
 exec > >(tee -a "$PROJECT_LOGS_DIR/init_project.log") 2>&1
 
@@ -46,7 +46,19 @@ VENV_DIR="$PROJECT_BASE_DIR/.venv"
 BENCH_DIR="$PROJECT_BASE_DIR/bench"
 
 # -------------------------------------------------
-# Preconditions (system-level, read-only)
+# Python interpreter for Frappe v16
+# -------------------------------------------------
+FRAPPE_PYTHON="python3.14"
+
+if ! command -v "$FRAPPE_PYTHON" >/dev/null 2>&1; then
+  echo "ERROR: $FRAPPE_PYTHON is not installed"
+  exit 1
+fi
+
+echo ">> Using Python interpreter: $FRAPPE_PYTHON"
+
+# -------------------------------------------------
+# Preconditions (system-level)
 # -------------------------------------------------
 echo ">> Verifying required system dependencies"
 
@@ -60,7 +72,7 @@ command -v wkhtmltopdf >/dev/null || {
 }
 
 # -------------------------------------------------
-# Ensure Supervisor is NOT running (CRITICAL)
+# Ensure Supervisor is NOT running
 # -------------------------------------------------
 if command -v supervisorctl >/dev/null 2>&1; then
   if pgrep -x supervisord >/dev/null 2>&1; then
@@ -118,7 +130,6 @@ if [ "$current_swap_mb" -lt "$REQUIRED_SWAP_MB" ]; then
   mkswap "$SWAPFILE"
   swapon "$SWAPFILE"
 
-  # Persist across reboots
   if ! grep -q "^$SWAPFILE" /etc/fstab; then
     echo "$SWAPFILE none swap sw 0 0" >> /etc/fstab
   fi
@@ -129,13 +140,13 @@ else
 fi
 
 # -------------------------------------------------
-# Node memory cap (prevents OOM)
+# Node memory cap
 # -------------------------------------------------
 export NODE_OPTIONS="--max-old-space-size=1024"
 echo ">> NODE_OPTIONS set to $NODE_OPTIONS"
 
 # -------------------------------------------------
-# Initialize bench (AS FRAPPE)
+# Initialize bench
 # -------------------------------------------------
 echo ">> Running bench init"
 
@@ -145,9 +156,9 @@ run_as_frappe bash -c "
   cd '$PROJECT_BASE_DIR'
 
   if [ -z '$FRAPPE_BRANCH' ]; then
-    bench init bench
+    bench init bench --python $FRAPPE_PYTHON
   else
-    bench init bench --frappe-branch '$FRAPPE_BRANCH'
+    bench init bench --frappe-branch '$FRAPPE_BRANCH' --python $FRAPPE_PYTHON
   fi
 "
 
@@ -160,4 +171,3 @@ if ! run_as_frappe test -f "$BENCH_DIR/Procfile"; then
 fi
 
 echo "== Project initialized successfully =="
-

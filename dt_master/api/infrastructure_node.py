@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import now_datetime
 
 
-BASE_DIR="/home/frappe/scripts"
+BASE_DIR="/home/frank/scripts"
 SCRIPT_BASE_DIR = f"{BASE_DIR}/bin/node/"
 SCRIPT_LIB_DIR = f"{BASE_DIR}/lib/"
 
@@ -110,6 +110,12 @@ def _get_ssh_config(node):
 def _execute_ssh_script(node, script_name):
     ssh = _get_ssh_config(node)
 
+    if not node.scripts_base_dir:
+        frappe.throw("Scripts base directory not configured on node")
+
+    SCRIPT_BASE_DIR = f"{node.scripts_base_dir}/bin/node"
+    SCRIPT_LIB_DIR = f"{node.scripts_base_dir}/lib"
+
     env_exports = (
         f"export PROJECT_BASE_DIR='{node.project_base_dir}'; "
         f"export PROJECT_LOGS_DIR='{node.project_logs_dir}'; "
@@ -119,7 +125,10 @@ def _execute_ssh_script(node, script_name):
         f"export BASE_DIR='{BASE_DIR}'; "
     )
 
-    remote_cmd = f"{env_exports} bash {SCRIPT_BASE_DIR}/{script_name}"
+    remote_cmd = (
+        f"sudo -n bash -c "
+        f"{shlex.quote(env_exports + f'bash {SCRIPT_BASE_DIR}/{script_name}')}"
+    )
 
     ssh_command = (
         f"ssh -p {ssh['port']} "

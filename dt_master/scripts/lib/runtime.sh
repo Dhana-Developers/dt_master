@@ -12,10 +12,19 @@ SUDOERS_FILE="/etc/sudoers.d/frappe"
 # Root enforcement
 # -------------------------------------------------
 require_root() {
-  if [ "$(id -u)" -ne 0 ]; then
-    echo "ERROR: This script must be run as root"
-    exit 1
+
+  # Case 1: actual root user
+  if [ "$(id -u)" -eq 0 ]; then
+    return 0
   fi
+
+  # Case 2: sudo available without password
+  if sudo -n true 2>/dev/null; then
+    return 0
+  fi
+
+  echo "ERROR: This script requires root privileges or a user with passwordless sudo"
+  exit 1
 }
 
 # -------------------------------------------------
@@ -24,7 +33,7 @@ require_root() {
 ensure_frappe_user() {
   if ! id "$FRAPPE_USER" &>/dev/null; then
     echo "INFO: Creating user '$FRAPPE_USER'"
-    useradd -m -s "$FRAPPE_SHELL" "$FRAPPE_USER"
+    sudo useradd -m -s "$FRAPPE_SHELL" "$FRAPPE_USER"
   fi
 }
 
@@ -34,8 +43,8 @@ ensure_frappe_user() {
 ensure_frappe_sudo() {
   if [ ! -f "$SUDOERS_FILE" ]; then
     echo "INFO: Granting passwordless sudo to '$FRAPPE_USER'"
-    echo "$FRAPPE_USER ALL=(ALL) NOPASSWD:ALL" > "$SUDOERS_FILE"
-    chmod 440 "$SUDOERS_FILE"
+    echo "$FRAPPE_USER ALL=(ALL) NOPASSWD:ALL" | sudo tee "$SUDOERS_FILE"
+    sudo chmod 440 "$SUDOERS_FILE"
   fi
 }
 

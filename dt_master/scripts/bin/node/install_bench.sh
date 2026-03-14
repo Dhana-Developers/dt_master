@@ -33,11 +33,21 @@ echo "== Installing Frappe Bench (project venv) =="
 VENV_DIR="$PROJECT_BASE_DIR/.venv"
 
 # -------------------------------------------------
-# Create venv as frappe
+# Create venv as frappe (Python 3.14 for Frappe v16)
 # -------------------------------------------------
+
+PYTHON_BIN="python3.14"
+
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+    echo "ERROR: $PYTHON_BIN not found. Python 3.14 is required."
+    exit 1
+fi
+
 if ! run_as_frappe test -d "$VENV_DIR"; then
-    echo "Creating virtual environment at $VENV_DIR"
-    run_as_frappe python3 -m venv "$VENV_DIR"
+    echo "Creating virtual environment at $VENV_DIR using $PYTHON_BIN"
+    run_as_frappe "$PYTHON_BIN" -m venv "$VENV_DIR"
+else
+    echo "Virtual environment already exists at $VENV_DIR"
 fi
 
 # -------------------------------------------------

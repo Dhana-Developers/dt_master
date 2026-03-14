@@ -34,6 +34,7 @@
   "wsgi_port",
   "os_type",
   "os_version",
+  "scripts_base_dir",
   "project_base_dir",
   "project_logs_dir",
   "project_service_name",
@@ -295,12 +296,17 @@
    "fieldname": "wsgi_port",
    "fieldtype": "Int",
    "label": "WSGI Port"
+  },
+  {
+   "fieldname": "scripts_base_dir",
+   "fieldtype": "Data",
+   "label": "Scripts Base Dir"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-21 23:34:25.891335",
+ "modified": "2026-03-13 09:44:25.370762",
  "modified_by": "Administrator",
  "module": "Dt Master",
  "name": "Infrastructure Node",

@@ -1,1 +1,1 @@
-__version__ = "0.2.0" # feat: Add payment gateways to enable transactions
+__version__ = "0.2.1" # maint: Fix issues associated with running automation scripts in nodes

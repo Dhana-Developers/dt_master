@@ -42,44 +42,80 @@ echo "== Installing system dependencies (Frappe) =="
 export DEBIAN_FRONTEND=noninteractive
 
 # -------------------------------------------------
-# Root-only system packages
+# Update package index
 # -------------------------------------------------
 apt-get update -y
 
+# -------------------------------------------------
+# Python 3.14 (required by Frappe v16)
+# -------------------------------------------------
+PYTHON_VERSION="3.14"
+
+if ! command -v python${PYTHON_VERSION} >/dev/null 2>&1; then
+  echo ">> Python ${PYTHON_VERSION} not found"
+
+  if ! apt-cache show python${PYTHON_VERSION} >/dev/null 2>&1; then
+    echo ">> Python ${PYTHON_VERSION} not available in current repositories"
+    echo ">> Adding deadsnakes PPA"
+    add-apt-repository ppa:deadsnakes/ppa -y
+    apt-get update -y
+  fi
+
+  echo ">> Installing Python ${PYTHON_VERSION}"
+  apt-get install -y \
+    python${PYTHON_VERSION} \
+    python${PYTHON_VERSION}-dev \
+    python${PYTHON_VERSION}-venv
+else
+  echo ">> Python ${PYTHON_VERSION} already installed"
+fi
+
+# -------------------------------------------------
+# Core system dependencies
+# -------------------------------------------------
 apt-get install -y \
   git \
   curl \
   sudo \
-  python3-dev \
-  python3-pip \
-  python3-setuptools \
-  python3-venv \
   redis-server \
   mariadb-server \
   mariadb-client \
   libmysqlclient-dev \
+  libffi-dev \
+  libssl-dev \
+  libjpeg-dev \
+  zlib1g-dev \
+  libpq-dev \
   xvfb \
-  libfontconfig \
+  libfontconfig1 \
   wkhtmltopdf \
-  software-properties-common\
-  jq\
-  certbot\
-  python3-certbot-nginx\
-  python3-tomli
+  software-properties-common \
+  jq \
+  certbot \
+  python3-certbot-nginx \
+  pkg-config \
+  build-essential \
+  locales
 
 # -------------------------------------------------
-# Node.js 18 (required by Frappe)
+# Node.js 24 (required by Frappe v16)
 # -------------------------------------------------
-if ! node -v 2>/dev/null | grep -q "^v18"; then
-  curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+if ! node -v 2>/dev/null | grep -q "^v24"; then
+  echo ">> Installing Node.js 24"
+  curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
   apt-get install -y nodejs
+else
+  echo ">> Node.js 24 already installed"
 fi
 
 # -------------------------------------------------
 # Yarn
 # -------------------------------------------------
 if ! command -v yarn >/dev/null 2>&1; then
+  echo ">> Installing Yarn"
   npm install -g yarn
+else
+  echo ">> Yarn already installed"
 fi
 
 # -------------------------------------------------

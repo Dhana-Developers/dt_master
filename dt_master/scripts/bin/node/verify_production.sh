@@ -29,7 +29,23 @@ REDIS_CONF_DIR="$BENCH_DIR/config"
 # -------------------------------------------------
 # Logging
 # -------------------------------------------------
-exec > >(tee -a "$PROJECT_LOGS_DIR/verify_production.log") 2>&1
+
+LOG_FILE=""
+
+if [ -d "$PROJECT_BASE_DIR" ]; then
+  mkdir -p "$PROJECT_LOGS_DIR"
+
+  LOG_FILE="$PROJECT_LOGS_DIR/verify_production.log"
+
+  if [ ! -f "$LOG_FILE" ]; then
+    touch "$LOG_FILE"
+  fi
+
+  exec > >(tee -a "$LOG_FILE") 2>&1
+else
+  echo "WARN: Project base directory not present yet: $PROJECT_BASE_DIR"
+  echo "WARN: Logging to file disabled until project base exists"
+fi
 
 echo "== Verifying Frappe production environment =="
 echo "Timestamp: $(date -Is)"
@@ -73,12 +89,17 @@ if [ -d "$PROJECT_BASE_DIR" ]; then
   echo "INFO: Project base directory exists: $PROJECT_BASE_DIR"
   ls -ld "$PROJECT_BASE_DIR"
 else
-  echo "ERROR: Project base directory missing"
+  echo "WARN: Project base directory missing (expected during early node stage)"
 fi
 
 echo ""
-echo "Top-level project contents:"
-ls -lah "$PROJECT_BASE_DIR"
+
+if [ -d "$PROJECT_BASE_DIR" ]; then
+  echo "Top-level project contents:"
+  ls -lah "$PROJECT_BASE_DIR"
+else
+  echo "WARN: Cannot list project contents because directory does not exist"
+fi
 # -------------------------------------------------
 # Ownership & permissions
 # -------------------------------------------------

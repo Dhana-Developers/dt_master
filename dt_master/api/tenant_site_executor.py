@@ -118,6 +118,12 @@ def _get_ssh_config(node):
 def _execute_ssh_script(node, tenant, script_name, apps=None):
     ssh = _get_ssh_config(node)
 
+    if not node.scripts_base_dir:
+        frappe.throw("Scripts base directory not configured on node")
+
+    SCRIPT_BASE_DIR = f"{node.scripts_base_dir}/bin/site"
+    SCRIPT_LIB_DIR = f"{node.scripts_base_dir}/lib"
+
     env_exports = (
         f"export SCRIPTS_BASE_DIR='{SCRIPTS_BASE_DIR}'; "
         f"export PROJECT_BASE_DIR='{node.project_base_dir}'; "
@@ -135,11 +141,13 @@ def _execute_ssh_script(node, tenant, script_name, apps=None):
         f"export TENANT_PROTOCOL='{tenant.protocol}'; "
         f"export LOCAL_HOSTS_ENTRY='{"true" if tenant.protocol == 'http' else "false"}'; "
     )
-    print(apps)
     if apps:
         env_exports += f"export APPS='{','.join(apps)}'; "
 
-    remote_cmd = f"{env_exports} bash {SCRIPTS_BASE_DIR}{script_name}"
+    remote_cmd = (
+        f"sudo -n bash -c "
+        f"{shlex.quote(env_exports + f'bash {SCRIPT_BASE_DIR}/{script_name}')}"
+    )
 
     ssh_command = (
         f"ssh -p {ssh['port']} "
