@@ -71,7 +71,7 @@ user=${MYSQL_ROOT_USER}
 password=${MYSQL_ROOT_PASSWORD}
 hosts=127.0.0.1
 dbname=${MAIL_DB}
-query=SELECT 1 FROM virtual_users WHERE email LIKE '%@%s' LIMIT 1;
+query=SELECT 1 FROM virtual_users WHERE SUBSTRING_INDEX(email,'@',-1)='%s' LIMIT 1;
 EOF
 
 cat > "${POSTFIX_SQL_DIR}/virtual_users.cf" <<EOF
@@ -79,7 +79,7 @@ user=${MYSQL_ROOT_USER}
 password=${MYSQL_ROOT_PASSWORD}
 hosts=127.0.0.1
 dbname=${MAIL_DB}
-query=SELECT 1 FROM virtual_users WHERE email='%s';
+query=SELECT email FROM virtual_users WHERE email='%s';
 EOF
 
 chmod 640 ${POSTFIX_SQL_DIR}/*.cf
