@@ -93,6 +93,9 @@ MAIL USER ACTION BUTTONS
 function setup_mail_user_buttons(frm) {
 
     frm.add_custom_button("Sync Mail Users", () => {
+        const dialog = create_tenant_log_dialog("Sync Mail Users");
+
+        start_mail_log_stream(dialog, frm.doc.name);
 
         frappe.call({
             method: "dt_master.api.mail_server_executor.list_mail_users",
@@ -107,6 +110,9 @@ function setup_mail_user_buttons(frm) {
     });
 
     frm.add_custom_button("Create Mailbox", () => {
+        const dialog = create_tenant_log_dialog("Create Mailbox");
+
+        start_mail_log_stream(dialog, frm.doc.name);
 
         const row = frm.fields_dict.mail_users.grid.get_selected_children()[0];
 
@@ -125,6 +131,9 @@ function setup_mail_user_buttons(frm) {
     });
 
     frm.add_custom_button("Delete Mailbox", () => {
+        const dialog = create_tenant_log_dialog("Delete Mailbox");
+
+        start_mail_log_stream(dialog, frm.doc.name);
 
         const row = frm.fields_dict.mail_users.grid.get_selected_children()[0];
 
@@ -143,6 +152,9 @@ function setup_mail_user_buttons(frm) {
     });
 
     frm.add_custom_button("Update Password", () => {
+        const dialog = create_tenant_log_dialog("Update Password");
+
+        start_mail_log_stream(dialog, frm.doc.name);
 
         const row = frm.fields_dict.mail_users.grid.get_selected_children()[0];
 
@@ -177,13 +189,15 @@ function show_and_bind(frm, label, method) {
 
     btn.$wrapper.off("click").on("click", () => {
 
+        const dialog = create_tenant_log_dialog(label);
+
+        start_mail_log_stream(dialog, frm.doc.name);
+
         frappe.call({
             method,
             args: {
                 mail_server_name: frm.doc.name
             },
-            freeze: true,
-            freeze_message: `${label.replace("_"," ")}…`,
             callback() {
                 frm.reload_doc();
             }
@@ -191,6 +205,67 @@ function show_and_bind(frm, label, method) {
 
     });
 
+}
+
+function create_tenant_log_dialog(title) {
+
+    const dialog = new frappe.ui.Dialog({
+        title: title.replaceAll("_"," "),
+        fields: [{ fieldtype:"HTML", fieldname:"log_container" }],
+        size: "large"
+    });
+
+    dialog.show();
+
+    dialog.log_el = dialog.fields_dict.log_container.$wrapper;
+
+    dialog.log_el.css({
+        background:"#111",
+        color:"#0f0",
+        "font-family":"monospace",
+        padding:"10px",
+        height:"400px",
+        "overflow-y":"scroll"
+    });
+
+    dialog.log_el.append(`<div style="color:#888">Starting remote action...</div>`);
+
+    return dialog;
+}
+
+function start_mail_log_stream(dialog, server_name) {
+
+    let cleared = false;
+
+    frappe.realtime.off("mail_executor_log");
+
+    frappe.realtime.on("mail_executor_log", data => {
+
+        if (data.server !== server_name) return;
+
+        if (data.line) {
+
+            if (!cleared) {
+                dialog.log_el.empty();
+                cleared = true;
+            }
+
+            dialog.log_el.append(
+                `<div>${frappe.utils.escape_html(data.line)}</div>`
+            );
+
+            dialog.log_el.scrollTop(dialog.log_el[0].scrollHeight);
+        }
+
+        if (data.status === "Completed") {
+            dialog.log_el.append(`<div style="color:#0f0">PROCESS COMPLETED</div>`);
+        }
+
+        if (data.status === "Failed") {
+            dialog.log_el.append(`<div style="color:red">PROCESS FAILED</div>`);
+        }
+
+    });
 }
 
 function hide_button(frm, label) {

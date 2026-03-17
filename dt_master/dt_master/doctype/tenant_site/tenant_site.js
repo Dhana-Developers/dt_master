@@ -225,27 +225,64 @@ function call_app_action(frm, cdt, cdn, method) {
         `Are you sure you want to ${method.replace("_"," ")} "${row.app_name}"?`,
         () => {
 
+            const dialog = create_tenant_log_dialog(method);
+
+            start_app_log_stream(dialog, frm.doc.name, row.name);
+
             frappe.call({
                 method: `dt_master.api.tenant_installed_app_executor.${method}`,
                 args: {
                     tenant_name: frm.doc.name,
                     row_name: row.name
                 },
-                freeze: true,
                 callback() {
-
-                    frappe.show_alert({
-                        message: __("Action queued"),
-                        indicator: "blue"
-                    });
-
                     frm.reload_doc();
-
                 }
             });
 
         }
     );
+
+}
+
+function start_app_log_stream(dialog, tenant_name, row_name) {
+
+    let placeholder_removed = false;
+
+    frappe.realtime.off("tenant_app_log");
+
+    frappe.realtime.on("tenant_app_log", data => {
+
+        if (data.tenant !== tenant_name) return;
+        if (data.row !== row_name) return;
+
+        if (data.line) {
+
+            if (!placeholder_removed) {
+                dialog.log_el.empty();
+                placeholder_removed = true;
+            }
+
+            const color = data.stream === "stderr" ? "#ff5555" : "#0f0";
+
+            dialog.log_el.append(
+                `<div style="color:${color}">
+                    ${frappe.utils.escape_html(data.line)}
+                </div>`
+            );
+
+            dialog.log_el.scrollTop(dialog.log_el[0].scrollHeight);
+        }
+
+        if (data.status === "Completed") {
+            dialog.log_el.append(`<div style="color:#0f0">PROCESS COMPLETED</div>`);
+        }
+
+        if (data.status === "Failed") {
+            dialog.log_el.append(`<div style="color:red">PROCESS FAILED</div>`);
+        }
+
+    });
 
 }
 
@@ -309,11 +346,13 @@ function show_and_bind(frm, label, method) {
 
     btn.$wrapper.off("click").on("click", () => {
 
+        const dialog = create_tenant_log_dialog(label);
+
+        start_tenant_log_stream(dialog, frm.doc.name);
+
         frappe.call({
             method,
             args: { tenant_name: frm.doc.name },
-            freeze: true,
-            freeze_message: `${label.replace("_"," ")}…`,
             callback() {
                 frm.reload_doc();
             }
@@ -322,6 +361,73 @@ function show_and_bind(frm, label, method) {
     });
 
 }
+
+function create_tenant_log_dialog(title) {
+
+    const dialog = new frappe.ui.Dialog({
+        title: title.replaceAll("_"," "),
+        fields: [{ fieldtype:"HTML", fieldname:"log_container" }],
+        size: "large"
+    });
+
+    dialog.show();
+
+    dialog.log_el = dialog.fields_dict.log_container.$wrapper;
+
+    dialog.log_el.css({
+        background:"#111",
+        color:"#0f0",
+        "font-family":"monospace",
+        padding:"10px",
+        height:"400px",
+        "overflow-y":"scroll"
+    });
+
+    dialog.log_el.append(`<div style="color:#888">Starting remote action...</div>`);
+
+    return dialog;
+}
+
+function start_tenant_log_stream(dialog, tenant_name) {
+
+    let placeholder_removed = false;
+
+    frappe.realtime.off("tenant_script_log");
+    frappe.realtime.on("tenant_script_log", data => {
+
+        if (data.tenant !== tenant_name) return;
+
+        if (data.line) {
+
+            if (!placeholder_removed) {
+                dialog.log_el.empty();   // remove "Starting remote action..."
+                placeholder_removed = true;
+            }
+
+            const color = data.stream === "stderr" ? "#ff5555" : "#0f0";
+
+            dialog.log_el.append(
+                `<div style="color:${color}">
+                    ${frappe.utils.escape_html(data.line)}
+                </div>`
+            );
+
+            dialog.log_el.scrollTop(dialog.log_el[0].scrollHeight);
+        }
+
+        if (data.status === "Completed") {
+            dialog.log_el.append(`<div style="color:#0f0">PROCESS COMPLETED</div>`);
+        }
+
+        if (data.status === "Failed") {
+            dialog.log_el.append(`<div style="color:red">PROCESS FAILED</div>`);
+        }
+
+    });
+
+}
+
+
 
 function hide_button(frm, label) {
 

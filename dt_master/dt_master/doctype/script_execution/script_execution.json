@@ -1,0 +1,165 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "autoincrement",
+ "creation": "2026-03-15 21:22:44.269488",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_script_info",
+  "script",
+  "script_file",
+  "target_context",
+  "node",
+  "target_doctype",
+  "target_document",
+  "section_break_execution_status",
+  "status",
+  "exit_code",
+  "timing_section",
+  "queued_at",
+  "started_at",
+  "finished_at",
+  "duration",
+  "audit_section",
+  "triggered_by",
+  "triggere_source",
+  "execution_logs"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_script_info",
+   "fieldtype": "Section Break",
+   "label": "Script Info"
+  },
+  {
+   "fieldname": "script",
+   "fieldtype": "Link",
+   "label": "Script",
+   "options": "Script Definition"
+  },
+  {
+   "fieldname": "script_file",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Script File",
+   "reqd": 1
+  },
+  {
+   "fieldname": "target_context",
+   "fieldtype": "Section Break",
+   "label": "Target Context"
+  },
+  {
+   "fieldname": "node",
+   "fieldtype": "Link",
+   "label": "Node",
+   "options": "Infrastructure Node"
+  },
+  {
+   "fieldname": "target_doctype",
+   "fieldtype": "Link",
+   "label": "Target Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "target_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Target Document",
+   "options": "target_doctype"
+  },
+  {
+   "fieldname": "section_break_execution_status",
+   "fieldtype": "Section Break",
+   "label": "Execution Status"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Queued\nRunning\nCompleted\nFailed"
+  },
+  {
+   "fieldname": "exit_code",
+   "fieldtype": "Int",
+   "label": "Exit Code"
+  },
+  {
+   "fieldname": "timing_section",
+   "fieldtype": "Section Break",
+   "label": "Timing"
+  },
+  {
+   "fieldname": "queued_at",
+   "fieldtype": "Datetime",
+   "label": "Queued At"
+  },
+  {
+   "fieldname": "started_at",
+   "fieldtype": "Datetime",
+   "label": "Started At"
+  },
+  {
+   "fieldname": "finished_at",
+   "fieldtype": "Datetime",
+   "label": "Finished At"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Float",
+   "label": "Duration"
+  },
+  {
+   "fieldname": "audit_section",
+   "fieldtype": "Section Break",
+   "label": "Audit"
+  },
+  {
+   "fieldname": "triggered_by",
+   "fieldtype": "Link",
+   "label": "Triggered By",
+   "options": "User"
+  },
+  {
+   "fieldname": "triggere_source",
+   "fieldtype": "Select",
+   "label": "Trigger Source",
+   "options": "Manual\nAPI\nScheduler"
+  },
+  {
+   "fieldname": "execution_logs",
+   "fieldtype": "Table",
+   "label": "Execution Logs",
+   "options": "Execution Log"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-16 22:36:57.415371",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "Script Execution",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

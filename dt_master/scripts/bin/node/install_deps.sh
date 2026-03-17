@@ -23,13 +23,12 @@ require_root
 # -------------------------------------------------
 : "${PROJECT_BASE_DIR:?}"
 : "${PROJECT_LOGS_DIR:?}"
+: "${SYSTEM_DEPENDENCIES:?}"
 
 # -------------------------------------------------
 # Create project directories as frappe
 # -------------------------------------------------
-run_as_frappe mkdir -p "$PROJECT_BASE_DIR" "$PROJECT_LOGS_DIR"
-
-# Safety net (idempotent)
+SKIP_NVM=1 run_as_frappe mkdir -p "$PROJECT_BASE_DIR" "$PROJECT_LOGS_DIR"
 chown -R frappe:frappe "$PROJECT_BASE_DIR" "$PROJECT_LOGS_DIR"
 
 # -------------------------------------------------
@@ -37,9 +36,18 @@ chown -R frappe:frappe "$PROJECT_BASE_DIR" "$PROJECT_LOGS_DIR"
 # -------------------------------------------------
 exec > >(tee -a "$PROJECT_LOGS_DIR/install_deps.log") 2>&1
 
-echo "== Installing system dependencies (Frappe) =="
+echo "== Installing system dependencies (dynamic) =="
 
 export DEBIAN_FRONTEND=noninteractive
+
+# -------------------------------------------------
+# Ensure jq exists (bootstrap dependency)
+# -------------------------------------------------
+if ! command -v jq >/dev/null 2>&1; then
+  echo ">> Installing jq (bootstrap)"
+  apt-get update -y
+  apt-get install -y jq
+fi
 
 # -------------------------------------------------
 # Update package index
@@ -47,81 +55,87 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 
 # -------------------------------------------------
-# Python 3.14 (required by Frappe v16)
+# Install dependencies dynamically
 # -------------------------------------------------
-PYTHON_VERSION="3.14"
+echo "$SYSTEM_DEPENDENCIES" | jq -c '.[]' | while read -r dep; do
 
-if ! command -v python${PYTHON_VERSION} >/dev/null 2>&1; then
-  echo ">> Python ${PYTHON_VERSION} not found"
+  NAME=$(echo "$dep" | jq -r '.name')
+  METHOD=$(echo "$dep" | jq -r '.install_method')
+  GROUP=$(echo "$dep" | jq -r '.group')
+  VERSION=$(echo "$dep" | jq -r '.version // empty')
+  REPO=$(echo "$dep" | jq -r '.repository // empty')
 
-  if ! apt-cache show python${PYTHON_VERSION} >/dev/null 2>&1; then
-    echo ">> Python ${PYTHON_VERSION} not available in current repositories"
-    echo ">> Adding deadsnakes PPA"
-    add-apt-repository ppa:deadsnakes/ppa -y
-    apt-get update -y
-  fi
+  echo "-------------------------------------------------"
+  echo ">> Processing: $NAME"
+  echo "   Method: $METHOD | Group: $GROUP | Version: $VERSION"
 
-  echo ">> Installing Python ${PYTHON_VERSION}"
-  apt-get install -y \
-    python${PYTHON_VERSION} \
-    python${PYTHON_VERSION}-dev \
-    python${PYTHON_VERSION}-venv
-else
-  echo ">> Python ${PYTHON_VERSION} already installed"
-fi
+  case "$METHOD" in
+
+    apt)
+      if [ -n "$REPO" ]; then
+        echo ">> Adding repository: $REPO"
+        add-apt-repository -y "$REPO" || true
+        apt-get update -y
+      fi
+
+      echo ">> Installing via apt: $NAME"
+      apt-get install -y "$NAME"
+      ;;
+
+    pip)
+      echo ">> Installing via pip: $NAME"
+      pip install "$NAME"
+      ;;
+
+    npm)
+      echo ">> Installing via npm: $NAME"
+      npm install -g "$NAME"
+      ;;
+
+    nvm)
+      echo ">> Installing Node via nvm: $VERSION"
+
+      SKIP_NVM=1 run_as_frappe bash -c "
+        export NVM_DIR=\"\$HOME/.nvm\"
+        [ -s \"\$NVM_DIR/nvm.sh\" ] && source \"\$NVM_DIR/nvm.sh\"
+
+        if ! command -v nvm >/dev/null 2>&1; then
+          echo 'ERROR: nvm not installed'
+          exit 1
+        fi
+
+        nvm install $VERSION
+        nvm use $VERSION
+      "
+      ;;
+
+    script)
+      echo ">> Running script for: $NAME"
+      if [ -z "$REPO" ]; then
+        echo "ERROR: script dependency missing repository"
+        exit 1
+      fi
+
+      SKIP_NVM=1 run_as_frappe bash -c "
+        curl -fsSL \"$REPO\" | bash
+      "
+      ;;
+
+    *)
+      echo "ERROR: Unknown install method: $METHOD"
+      exit 1
+      ;;
+
+  esac
+
+done
 
 # -------------------------------------------------
-# Core system dependencies
+# Enable and start services (still system-level)
 # -------------------------------------------------
-apt-get install -y \
-  git \
-  curl \
-  sudo \
-  redis-server \
-  mariadb-server \
-  mariadb-client \
-  libmysqlclient-dev \
-  libffi-dev \
-  libssl-dev \
-  libjpeg-dev \
-  zlib1g-dev \
-  libpq-dev \
-  xvfb \
-  libfontconfig1 \
-  wkhtmltopdf \
-  software-properties-common \
-  jq \
-  certbot \
-  python3-certbot-nginx \
-  pkg-config \
-  build-essential \
-  locales
+echo ">> Ensuring core services are running"
 
-# -------------------------------------------------
-# Node.js 24 (required by Frappe v16)
-# -------------------------------------------------
-if ! node -v 2>/dev/null | grep -q "^v24"; then
-  echo ">> Installing Node.js 24"
-  curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
-  apt-get install -y nodejs
-else
-  echo ">> Node.js 24 already installed"
-fi
-
-# -------------------------------------------------
-# Yarn
-# -------------------------------------------------
-if ! command -v yarn >/dev/null 2>&1; then
-  echo ">> Installing Yarn"
-  npm install -g yarn
-else
-  echo ">> Yarn already installed"
-fi
-
-# -------------------------------------------------
-# Services
-# -------------------------------------------------
-systemctl enable redis-server mariadb
-systemctl start redis-server mariadb
+systemctl enable redis-server mariadb || true
+systemctl start redis-server mariadb || true
 
 echo "== Dependency installation complete =="

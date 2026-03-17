@@ -1,6 +1,8 @@
 import subprocess
 import shlex
 import datetime
+import json
+import base64
 
 import frappe
 from frappe.utils import now_datetime
@@ -107,6 +109,34 @@ def _get_ssh_config(node):
         "port": node.ssh_port or 22
     }
 
+def _get_node_dependencies(node):
+    deps = frappe.get_all(
+        "Framework Version Dependency",
+        filters={
+            "framework_version": node.frappe_version,
+            "enabled": 1
+        },
+        fields=["dependency", "install_order"],
+        order_by="install_order asc"
+    )
+
+    result = []
+
+    for d in deps:
+        dep = frappe.get_doc("System Dependency", d.dependency)
+
+        result.append({
+            "name": dep.name,
+            "install_method": dep.install_method,
+            "group": dep.dependency_group,
+            "version": getattr(dep, "version", None),
+            "repository": dep.repository,
+        })
+
+    return result
+
+import json
+
 def _execute_ssh_script(node, script_name):
     ssh = _get_ssh_config(node)
 
@@ -116,14 +146,55 @@ def _execute_ssh_script(node, script_name):
     SCRIPT_BASE_DIR = f"{node.scripts_base_dir}/bin/node"
     SCRIPT_LIB_DIR = f"{node.scripts_base_dir}/lib"
 
+    # -------------------------------------------------
+    # Resolve Framework Version Doc
+    # -------------------------------------------------
+    fv = frappe.get_doc("Framework Version", node.frappe_version)
+
+    frappe_context = {
+        "name": fv.name,
+        "framework": fv.framework,
+        "version": fv.version,
+        "python_version": fv.python_version,
+        "node_version": fv.node_version,
+        "bench_package": fv.bench_package,
+        "description": fv.description,
+    }
+
+    # -------------------------------------------------
+    # Dependencies
+    # -------------------------------------------------
+    deps = _get_node_dependencies(node)
+    encoded = base64.b64encode(json.dumps(frappe_context).encode()).decode()
+    # -------------------------------------------------
+    # Environment exports
+    # -------------------------------------------------
     env_exports = (
         f"export PROJECT_BASE_DIR='{node.project_base_dir}'; "
         f"export PROJECT_LOGS_DIR='{node.project_logs_dir}'; "
-        f"export FRAPPE_VERSION='{node.frappe_version}'; "
+
+        # 🔥 Correct version (not doc name)
+        f"export FRAPPE_VERSION='{fv.version}'; "
+        f"export FRAMEWORK_NAME='{fv.framework}'; "
+
+        # Runtime hints
+        f"export PYTHON_VERSION='{fv.python_version or ''}'; "
+        f"export NODE_VERSION='{fv.node_version or ''}'; "
+        f"export BENCH_PACKAGE='{fv.bench_package or ''}'; "
+
+        # Paths
         f"export SCRIPT_BASE_DIR='{SCRIPT_BASE_DIR}'; "
         f"export SCRIPT_LIB_DIR='{SCRIPT_LIB_DIR}'; "
         f"export BASE_DIR='{BASE_DIR}'; "
+
+        # Full structured context (future-proof)
+        # f"export FRAMEWORK_CONTEXT='{json.dumps(frappe_context)}'; "
+
+        # Dependency graph
+        f"export SYSTEM_DEPENDENCIES='{json.dumps(deps)}'; "
     )
+
+    env_exports += f"export FRAMEWORK_CONTEXT_B64='{encoded}'; "
 
     remote_cmd = (
         f"sudo -n bash -c "
@@ -140,11 +211,41 @@ def _execute_ssh_script(node, script_name):
         ssh_command,
         shell=True,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1
     )
 
-    stdout, stderr = process.communicate()
+    stdout_lines = []
+
+    for line in iter(process.stdout.readline, ''):
+        line = line.rstrip()
+        stdout_lines.append(line)
+
+        frappe.publish_realtime(
+            "script_execution_log",
+            {
+                "execution": script_name,
+                "line": line
+            },
+            user=frappe.session.user
+        )
+
+    process.wait()
+
+    stdout = "\n".join(stdout_lines)
+    stderr = ""
+
+    exec_status = "Completed" if process.returncode == 0 else "Failed"
+
+    frappe.publish_realtime(
+        "script_execution_log",
+        {
+            "execution": script_name,
+            "status": exec_status
+        },
+        user=frappe.session.user
+    )
 
     return process.returncode, stdout, stderr
 

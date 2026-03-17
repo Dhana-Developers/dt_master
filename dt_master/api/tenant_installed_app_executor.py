@@ -1,7 +1,8 @@
 import subprocess
 import shlex
-
+import json
 import requests
+
 import frappe
 from frappe.utils import now_datetime
 
@@ -137,6 +138,18 @@ def _execute_ssh_script(node, tenant, app_row, script_name):
     SCRIPTS_BASE_DIR = f"{node.scripts_base_dir}/bin/app/"
     SCRIPT_LIB_DIR = f"{node.scripts_base_dir}/lib/"
 
+    fv = frappe.get_doc("Framework Version", node.frappe_version)
+
+    frappe_context = {
+        "name": fv.name,
+        "framework": fv.framework,
+        "version": fv.version,
+        "python_version": fv.python_version,
+        "node_version": fv.node_version,
+        "bench_package": fv.bench_package,
+        "description": fv.description,
+    }
+
     extension_version = None
     extension = None
 
@@ -167,7 +180,18 @@ def _execute_ssh_script(node, tenant, app_row, script_name):
         f"export MYSQL_ROOT_USER='{tenant.mysql_root_user_name}'; "
         f"export MYSQL_ROOT_PASSWORD='{tenant.mysql_root_user_password}'; "
         f"export FRAPPE_UPSTREAM_PORT='{tenant.port}'; "
-        f"export FRAPPE_VERSION='{node.frappe_version}'; "
+
+        # 🔥 Correct version (not doc name)
+        f"export FRAPPE_VERSION='{fv.version}'; "
+        f"export FRAMEWORK_NAME='{fv.framework}'; "
+
+        # Runtime hints
+        f"export PYTHON_VERSION='{fv.python_version or ''}'; "
+        f"export NODE_VERSION='{fv.node_version or ''}'; "
+        f"export BENCH_PACKAGE='{fv.bench_package or ''}'; "
+
+        # Full structured context (future-proof)
+        f"export FRAMEWORK_CONTEXT='{json.dumps(frappe_context)}'; "
 
         f"export INSTALL_MODE='{extension.install_mode if extension else ''}'; "
         f"export SOURCE_REF='{extension_version.source_ref if extension_version else ''}'; "
@@ -193,9 +217,57 @@ def _execute_ssh_script(node, tenant, app_row, script_name):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        bufsize=1
     )
 
-    stdout, stderr = proc.communicate()
+    stdout_lines = []
+    stderr_lines = []
+
+    for line in iter(proc.stdout.readline, ''):
+        line = line.rstrip()
+        stdout_lines.append(line)
+
+        frappe.publish_realtime(
+            "tenant_app_log",
+            {
+                "tenant": tenant.name,
+                "row": app_row.name,
+                "line": line,
+                "stream": "stdout"
+            },
+            user=frappe.session.user
+        )
+
+    for line in iter(proc.stderr.readline, ''):
+        line = line.rstrip()
+        stderr_lines.append(line)
+
+        frappe.publish_realtime(
+            "tenant_app_log",
+            {
+                "tenant": tenant.name,
+                "row": app_row.name,
+                "line": line,
+                "stream": "stderr"
+            },
+            user=frappe.session.user
+        )
+
+    proc.wait()
+
+    stdout = "\n".join(stdout_lines)
+    stderr = "\n".join(stderr_lines)
+
+    frappe.publish_realtime(
+        "tenant_app_log",
+        {
+            "tenant": tenant.name,
+            "row": app_row.name,
+            "status": "Completed" if proc.returncode == 0 else "Failed"
+        },
+        user=frappe.session.user
+    )
+
     return proc.returncode, stdout, stderr
 
 # ---------------------------------------------------------------------
@@ -403,19 +475,6 @@ def _handle_mutating_result(tenant, app_row, action_def, result):
 # ---------------------------------------------------------------------
 # MAIN ORCHESTRATOR
 # ---------------------------------------------------------------------
-# def _run_app_action(tenant_name, row_name, action):
-#     tenant, app_row, node = _load_action_context(tenant_name, row_name)
-#     action_def = _validate_action(app_row, action)
-
-#     _mark_action_running(tenant, app_row, action)
-
-#     result = _execute_action(
-#         node, tenant, app_row, action_def["script"]
-#     )
-#     if action_def.get("readonly"):
-#         return _handle_readonly_result(tenant, app_row, result,action)
-
-#     return _handle_mutating_result(tenant, app_row, action_def, result)
 
 def _run_app_action(tenant_name, row_name, action):
 

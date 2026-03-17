@@ -221,9 +221,6 @@ def _execute_mail_script(node, mail_server, script_name, mail_user=None):
     if not node.scripts_base_dir:
         frappe.throw("Scripts base directory not configured on node")
 
-    if not node.ip_address:
-        frappe.throw("Node IP address not configured")
-
     tenant = None
     if mail_server.tenant_site:
         tenant = frappe.get_doc("Tenant Site", mail_server.tenant_site)
@@ -235,24 +232,17 @@ def _execute_mail_script(node, mail_server, script_name, mail_user=None):
         f"export SCRIPTS_BASE_DIR='{SCRIPT_BASE_DIR}'; "
         f"export SCRIPT_LIB_DIR='{SCRIPT_LIB_DIR}'; "
         f"export BASE_DIR='{BASE_DIR}'; "
-
         f"export MAIL_DOMAIN='{mail_server.domain}'; "
         f"export MAIL_HOSTNAME='{mail_server.hostname}'; "
         f"export MAIL_IP='{node.ip_address}'; "
-
         f"export SMTP_PORT='{mail_server.smtp_port}'; "
         f"export IMAP_PORT='{mail_server.imap_port}'; "
         f"export DKIM_SELECTOR='{mail_server.dkim_selector}'; "
-
         f"export PROJECT_BASE_DIR='{node.project_base_dir}'; "
         f"export PROJECT_LOGS_DIR='{node.project_logs_dir}'; "
     )
 
-    # -------------------------------------------------
-    # Tenant variables (optional)
-    # -------------------------------------------------
     if tenant:
-
         env_exports += (
             f"export SITE_NAME='{tenant.fqdn}'; "
             f"export TENANT_PROTOCOL='{tenant.protocol or 'https'}'; "
@@ -264,9 +254,7 @@ def _execute_mail_script(node, mail_server, script_name, mail_user=None):
         )
 
         if mail_user:
-
             local, domain = mail_user.email.split("@")
-
             env_exports += f"export MAIL_USER='{local}'; "
 
             if mail_user.password:
@@ -297,17 +285,29 @@ def _execute_mail_script(node, mail_server, script_name, mail_user=None):
     for line in iter(proc.stdout.readline, ''):
         line = line.rstrip()
         output_lines.append(line)
-        print(line)
 
-        # optional streaming point
-        # frappe.publish_realtime("mail_executor_log", {
-        #     "server": mail_server.name,
-        #     "line": line
-        # })
+        print(line)  # also print to local stdout for debugging
+        frappe.publish_realtime(
+            "mail_executor_log",
+            {
+                "server": mail_server.name,
+                "line": line
+            },
+            user=frappe.session.user
+        )
 
     proc.wait()
 
     stdout = "\n".join(output_lines)
+
+    frappe.publish_realtime(
+        "mail_executor_log",
+        {
+            "server": mail_server.name,
+            "status": "Completed" if proc.returncode == 0 else "Failed"
+        },
+        user=frappe.session.user
+    )
 
     return proc.returncode, stdout, ""
 

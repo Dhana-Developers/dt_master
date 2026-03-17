@@ -289,8 +289,9 @@
   },
   {
    "fieldname": "frappe_version",
-   "fieldtype": "Int",
-   "label": "Frappe Version"
+   "fieldtype": "Link",
+   "label": "Frappe Version",
+   "options": "Framework Version"
   },
   {
    "fieldname": "wsgi_port",
@@ -306,7 +307,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-13 09:44:25.370762",
+ "modified": "2026-03-17 09:34:32.693299",
  "modified_by": "Administrator",
  "module": "Dt Master",
  "name": "Infrastructure Node",

@@ -72,12 +72,19 @@ fi
 # -------------------------------------------------
 # Final sanity check: supervisor control plane only
 # -------------------------------------------------
-if [ ! -S /var/run/supervisor.sock ]; then
-  echo "ERROR: Supervisor socket missing (/var/run/supervisor.sock)"
+
+echo ">> Verifying Supervisor control plane"
+
+# Give supervisor a moment to initialize
+sleep 4
+
+if ! systemctl is-active supervisor >/dev/null 2>&1; then
+  echo "ERROR: Supervisor service is not active"
+  systemctl status supervisor --no-pager || true
   exit 1
 fi
 
-if ! supervisorctl pid >/dev/null 2>&1; then
+if ! supervisorctl status >/dev/null 2>&1; then
   echo "ERROR: supervisorctl cannot communicate with supervisord"
   exit 1
 fi

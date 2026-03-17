@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:dependency_name",
+ "creation": "2026-03-17 01:06:21.033814",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_dgbr",
+  "dependency_name",
+  "install_method",
+  "dependency_group",
+  "repository",
+  "version",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_dgbr",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "dependency_name",
+   "fieldtype": "Data",
+   "label": "Dependency Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "install_method",
+   "fieldtype": "Select",
+   "label": "Install Method",
+   "options": "apt\npip\nnpm\nscript\nnvm"
+  },
+  {
+   "fieldname": "dependency_group",
+   "fieldtype": "Select",
+   "label": "Dependency Group",
+   "options": "system\npython\nnode"
+  },
+  {
+   "description": "optional PPA",
+   "fieldname": "repository",
+   "fieldtype": "Data",
+   "label": "Repository"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Data",
+   "label": "Version"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-17 10:10:29.197572",
+ "modified_by": "Administrator",
+ "module": "Dt Master",
+ "name": "System Dependency",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

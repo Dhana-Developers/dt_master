@@ -1,3 +1,4 @@
+import json
 import subprocess
 import shlex
 
@@ -124,8 +125,20 @@ def _execute_ssh_script(node, tenant, script_name, apps=None):
     SCRIPT_BASE_DIR = f"{node.scripts_base_dir}/bin/site"
     SCRIPT_LIB_DIR = f"{node.scripts_base_dir}/lib"
 
+    fv = frappe.get_doc("Framework Version", node.frappe_version)
+
+    frappe_context = {
+        "name": fv.name,
+        "framework": fv.framework,
+        "version": fv.version,
+        "python_version": fv.python_version,
+        "node_version": fv.node_version,
+        "bench_package": fv.bench_package,
+        "description": fv.description,
+    }
+
     env_exports = (
-        f"export SCRIPTS_BASE_DIR='{SCRIPTS_BASE_DIR}'; "
+        f"export SCRIPTS_BASE_DIR='{SCRIPT_BASE_DIR}'; "
         f"export PROJECT_BASE_DIR='{node.project_base_dir}'; "
         f"export PROJECT_LOGS_DIR='{node.project_logs_dir}'; "
         f"export BENCH_DIR='{node.project_base_dir}/bench'; "
@@ -135,14 +148,27 @@ def _execute_ssh_script(node, tenant, script_name, apps=None):
         f"export MYSQL_ROOT_USER='{tenant.mysql_root_user_name}'; "
         f"export MYSQL_ROOT_PASSWORD='{tenant.mysql_root_user_password}'; "
         f"export FRAPPE_UPSTREAM_PORT='{tenant.port}'; "
-        f"export FRAPPE_VERSION='{node.frappe_version}'; "
+
+        # 🔥 Correct version (not doc name)
+        f"export FRAPPE_VERSION='{fv.version}'; "
+        f"export FRAMEWORK_NAME='{fv.framework}'; "
+
+        # Runtime hints
+        f"export PYTHON_VERSION='{fv.python_version or ''}'; "
+        f"export NODE_VERSION='{fv.node_version or ''}'; "
+        f"export BENCH_PACKAGE='{fv.bench_package or ''}'; "
+
+        # Full structured context (future-proof)
+        f"export FRAMEWORK_CONTEXT='{json.dumps(frappe_context)}'; "
+        
         f"export SCRIPT_LIB_DIR='{SCRIPT_LIB_DIR}'; "
         f"export BASE_DIR='{BASE_DIR}'; "
         f"export TENANT_PROTOCOL='{tenant.protocol}'; "
-        f"export LOCAL_HOSTS_ENTRY='{"true" if tenant.protocol == 'http' else "false"}'; "
+        f"export LOCAL_HOSTS_ENTRY='{'true' if tenant.protocol == 'http' else 'false'}'; "
     )
+
     if apps:
-        env_exports += f"export APPS='{','.join(apps)}'; "
+        env_exports += f"export APPS_JSON='{json.dumps(apps)}'; "
 
     remote_cmd = (
         f"sudo -n bash -c "
@@ -161,9 +187,58 @@ def _execute_ssh_script(node, tenant, script_name, apps=None):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        bufsize=1
     )
 
-    stdout, stderr = proc.communicate()
+    stdout_lines = []
+    stderr_lines = []
+
+    # read stdout live
+    for line in iter(proc.stdout.readline, ''):
+        line = line.rstrip()
+
+        stdout_lines.append(line)
+
+        frappe.publish_realtime(
+            "tenant_script_log",
+            {
+                "tenant": tenant.name,
+                "line": line,
+                "stream": "stdout"
+            },
+            user=frappe.session.user
+        )
+
+    # read remaining stderr
+    for line in iter(proc.stderr.readline, ''):
+        line = line.rstrip()
+
+        stderr_lines.append(line)
+
+        frappe.publish_realtime(
+            "tenant_script_log",
+            {
+                "tenant": tenant.name,
+                "line": line,
+                "stream": "stderr"
+            },
+            user=frappe.session.user
+        )
+
+    proc.wait()
+
+    stdout = "\n".join(stdout_lines)
+    stderr = "\n".join(stderr_lines)
+
+    frappe.publish_realtime(
+        "tenant_script_log",
+        {
+            "tenant": tenant.name,
+            "status": "Completed" if proc.returncode == 0 else "Failed"
+        },
+        user=frappe.session.user
+    )
+
     return proc.returncode, stdout, stderr
 
 
@@ -365,12 +440,26 @@ def _run_tenant_action(tenant_name, action):
 
     apps = []
     if action == "install_apps":
-        apps = [
-            r.app_name for r in tenant.installed_apps
-            if r.enabled and r.status in ("Pending", "Failed")
-        ]
-        if not apps:
-            frappe.throw("No pending apps to install")
+
+        for row in tenant.installed_apps:
+            if not (row.enabled and row.status in ("Pending", "Failed")):
+                continue
+
+            if not row.extension_version:
+                frappe.throw(f"Missing extension version for app {row.app_name}")
+
+            ev = frappe.get_doc("Extension Version", row.extension_version)
+            ext = frappe.get_doc("Extension", ev.extension)
+
+            apps.append({
+                "app_name": ext.app_name,
+                "repo_url": ext.repository_url,
+                "ref": ev.source_ref or ext.default_branch,
+                "ref_type": ev.ref_type or "branch",
+                "install_strategy": ev.install_strategy or "git_branch",
+            })
+            if not apps:
+                frappe.throw("No pending apps to install")
 
     # Maintenance
     if _is_maintenance_action(action, tenant):

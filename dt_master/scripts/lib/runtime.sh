@@ -13,17 +13,15 @@ SUDOERS_FILE="/etc/sudoers.d/frappe"
 # -------------------------------------------------
 require_root() {
 
-  # Case 1: actual root user
   if [ "$(id -u)" -eq 0 ]; then
     return 0
   fi
 
-  # Case 2: sudo available without password
   if sudo -n true 2>/dev/null; then
     return 0
   fi
 
-  echo "ERROR: This script requires root privileges or a user with passwordless sudo"
+  echo "ERROR: This script requires root privileges or passwordless sudo"
   exit 1
 }
 
@@ -38,25 +36,60 @@ ensure_frappe_user() {
 }
 
 # -------------------------------------------------
-# Ensure passwordless sudo for frappe (idempotent)
+# Ensure passwordless sudo (idempotent)
 # -------------------------------------------------
 ensure_frappe_sudo() {
   if [ ! -f "$SUDOERS_FILE" ]; then
     echo "INFO: Granting passwordless sudo to '$FRAPPE_USER'"
-    echo "$FRAPPE_USER ALL=(ALL) NOPASSWD:ALL" | sudo tee "$SUDOERS_FILE"
+    echo "$FRAPPE_USER ALL=(ALL) NOPASSWD:ALL" | sudo tee "$SUDOERS_FILE" >/dev/null
     sudo chmod 440 "$SUDOERS_FILE"
   fi
 }
 
-# -------------------------------------------------
-# Run command as frappe (safe, idempotent)
-# -------------------------------------------------
 run_as_frappe() {
   require_root
   ensure_frappe_user
   ensure_frappe_sudo
 
   sudo -u "$FRAPPE_USER" \
-    --preserve-env=PROJECT_BASE_DIR,PROJECT_LOGS_DIR \
-    "$@"
+    --preserve-env=PROJECT_BASE_DIR,PROJECT_LOGS_DIR,NODE_VERSION,SKIP_NVM \
+    env HOME="/home/$FRAPPE_USER" \
+    bash -lc '
+      set -e
+
+      # -------------------------------------------------
+      # Conditionally load NVM
+      # -------------------------------------------------
+      if [ "${SKIP_NVM:-0}" != "1" ]; then
+
+        export NVM_DIR="$HOME/.nvm"
+
+        if [ -s "$NVM_DIR/nvm.sh" ]; then
+          source "$NVM_DIR/nvm.sh"
+
+          if [ -n "${NODE_VERSION:-}" ]; then
+            nvm use "$NODE_VERSION" >/dev/null || {
+              echo "ERROR: Failed to activate Node $NODE_VERSION via nvm"
+              exit 1
+            }
+          fi
+        fi
+
+        # Optional debug only if NVM expected
+        if command -v node >/dev/null 2>&1; then
+          echo ">> Node (frappe): $(node -v)"
+        else
+          echo "ERROR: Node not available in frappe environment"
+          exit 1
+        fi
+
+      else
+        echo ">> SKIP_NVM=1 → skipping NVM initialization"
+      fi
+
+      # -------------------------------------------------
+      # Execute command
+      # -------------------------------------------------
+      "$@"
+    ' bash "$@"
 }
