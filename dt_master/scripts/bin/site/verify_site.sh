@@ -92,6 +92,42 @@ jq -r '.redis_cache?,.redis_queue?,.redis_socketio?' "$COMMON_CONFIG" \
   fi
 done
 
+
+# -------------------------------------------------
+# Pre-flight remediation (SAFE SELF-HEAL)
+# -------------------------------------------------
+log ">> Running pre-flight remediation (cache/build/migrate)"
+
+REMEDIATION_FAILED=0
+
+(
+  cd "$BENCH_DIR" || exit 1
+
+  # 1. Clear cache (safe always)
+  if ! bench_exec --site "$SITE_NAME" clear-cache; then
+    log "WARN: clear-cache failed"
+    REMEDIATION_FAILED=1
+  fi
+
+  # 2. Migrate (safe, idempotent)
+  if ! bench_exec --site "$SITE_NAME" migrate; then
+    log "WARN: migrate failed"
+    REMEDIATION_FAILED=1
+  fi
+
+  # 3. Build assets (only if needed, but safe to run)
+  if ! bench_exec build; then
+    log "WARN: build failed"
+    REMEDIATION_FAILED=1
+  fi
+)
+
+if [ "$REMEDIATION_FAILED" -eq 1 ]; then
+  log "INFO: Remediation encountered issues (continuing verification)"
+else
+  log "OK: Remediation completed"
+fi
+
 # -------------------------------------------------
 # Supervisor checks (PRIMARY HEALTH SIGNAL)
 # -------------------------------------------------

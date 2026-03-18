@@ -44,28 +44,24 @@ CURRENT_BRANCH="$(run_as_frappe git branch --show-current)"
 
 # ------------------------------------------------------------
 # Rule A: upgrades must run from a branch
-# Auto-recover only if detached HEAD
 # ------------------------------------------------------------
 if [[ -z "$CURRENT_BRANCH" ]]; then
     log "state=detached_head"
     log "action=reattach_branch"
     log "target_branch=$SOURCE_REF"
 
-    # Ensure branch exists (local or remote)
     if run_as_frappe git show-ref --verify --quiet "refs/heads/${SOURCE_REF}"; then
         run_as_frappe git checkout "${SOURCE_REF}"
-    elif run_as_frappe git show-ref --verify --quiet "refs/remotes/${REMOTE_NAME}/${SOURCE_REF}"; then
-        run_as_frappe git checkout -B "${SOURCE_REF}" "${REMOTE_NAME}/${SOURCE_REF}"
+    elif run_as_frappe git show-ref --verify --quiet "refs/remotes/origin/${SOURCE_REF}"; then
+        run_as_frappe git checkout -B "${SOURCE_REF}" "origin/${SOURCE_REF}"
     else
         log "error=expected_branch_not_found"
-        log "expected_branch=$SOURCE_REF"
         exit 1
     fi
 
     CURRENT_BRANCH="$SOURCE_REF"
 fi
 
-# Final safety check
 if [[ "$CURRENT_BRANCH" != "$SOURCE_REF" ]]; then
     log "error=branch_mismatch"
     log "current_branch=$CURRENT_BRANCH"
@@ -74,31 +70,10 @@ if [[ "$CURRENT_BRANCH" != "$SOURCE_REF" ]]; then
 fi
 
 # ------------------------------------------------------------
-# Resolve git remote safely
+# Resolve git remote
 # ------------------------------------------------------------
 resolve_git_remote() {
-    require_env APP_DIR
-
-    local repo_url="${REPOSITORY_URL:-}"
     local remotes
-    local name
-    local url
-
-    # Not a git repo
-    run_as_frappe git -C "$APP_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
-        || return 1
-
-    # Try to match by URL first (best)
-    if [[ -n "$repo_url" ]]; then
-        while read -r name url _; do
-            if [[ "$url" == "$repo_url" ]]; then
-                echo "$name"
-                return 0
-            fi
-        done < <(run_as_frappe git -C "$APP_DIR" remote -v | awk '{print $1, $2}')
-    fi
-
-    # Fallback: single remote only
     remotes="$(run_as_frappe git -C "$APP_DIR" remote)"
 
     if [[ "$(echo "$remotes" | wc -l)" -eq 1 ]]; then
@@ -115,13 +90,55 @@ REMOTE_NAME="$(resolve_git_remote)" || {
 }
 
 # ------------------------------------------------------------
-# Fetch & fast-forward to latest on same branch
+# 🔐 Ensure correct remote URL (ENFORCEMENT)
 # ------------------------------------------------------------
-run_as_frappe git fetch "${REMOTE_NAME}" "${SOURCE_REF}"
+if [[ -n "${REPOSITORY_URL:-}" ]]; then
+    CURRENT_URL="$(run_as_frappe git -C "$APP_DIR" remote get-url "$REMOTE_NAME")"
+
+    if [[ "$CURRENT_URL" != "$REPOSITORY_URL" ]]; then
+        log "action=fix_remote_url"
+        run_as_frappe git -C "$APP_DIR" remote set-url "$REMOTE_NAME" "$REPOSITORY_URL"
+    fi
+fi
+
+# ------------------------------------------------------------
+# 🔑 SSH failure handling (NEW)
+# ------------------------------------------------------------
+GIT_ERROR_FILE="/tmp/git_fetch_error.log"
+
+if ! run_as_frappe git fetch "$REMOTE_NAME" "$SOURCE_REF" 2>"$GIT_ERROR_FILE"; then
+
+    if grep -q "Permission denied (publickey)" "$GIT_ERROR_FILE"; then
+        log "error=ssh_auth_failed"
+        log "action=deploy_key_required"
+
+        KEY_PATH="/home/frappe/.ssh/id_rsa"
+
+        if [ ! -f "$KEY_PATH" ]; then
+            log "action=generating_deploy_key"
+            run_as_frappe mkdir -p /home/frappe/.ssh
+            run_as_frappe ssh-keygen -t rsa -b 4096 -N "" -f "$KEY_PATH"
+        fi
+
+        PUB_KEY="$(run_as_frappe cat ${KEY_PATH}.pub)"
+
+        echo "deploy_key_required=true"
+        echo "deploy_key=${PUB_KEY}"
+
+        exit 1
+    fi
+
+    log "error=git_fetch_failed"
+    exit 1
+fi
+
+# ------------------------------------------------------------
+# Fast-forward
+# ------------------------------------------------------------
 run_as_frappe git reset --hard "${REMOTE_NAME}/${SOURCE_REF}"
 
 # ------------------------------------------------------------
-# Bench lifecycle (venv-safe, memory-safe, build-safe)
+# Bench lifecycle
 # ------------------------------------------------------------
 export NODE_OPTIONS="--max-old-space-size=4096"
 export FRAPPE_NODE_OPTIONS="--max-old-space-size=4096"
@@ -132,7 +149,7 @@ bench_exec build
 clear_cache_and_reload
 
 # ------------------------------------------------------------
-# Detect final state (authoritative)
+# Detect final state
 # ------------------------------------------------------------
 cd "$APP_DIR"
 
@@ -156,7 +173,7 @@ EOF
 )"
 
 # ------------------------------------------------------------
-# Output (machine contract)
+# Output
 # ------------------------------------------------------------
 echo "app_name=${APP}"
 echo "installed=true"

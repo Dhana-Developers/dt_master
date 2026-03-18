@@ -69,26 +69,22 @@ run_as_frappe() {
 
           if [ -n "${NODE_VERSION:-}" ]; then
             nvm use "$NODE_VERSION" >/dev/null || {
-              echo "ERROR: Failed to activate Node $NODE_VERSION via nvm"
+              echo "ERROR: Failed to activate Node $NODE_VERSION via nvm" >&2
               exit 1
             }
           fi
         fi
 
-        # Optional debug only if NVM expected
-        if command -v node >/dev/null 2>&1; then
-          echo ">> Node (frappe): $(node -v)"
-        else
-          echo "ERROR: Node not available in frappe environment"
+        # Validate Node exists (NO stdout pollution)
+        if ! command -v node >/dev/null 2>&1; then
+          echo "ERROR: Node not available in frappe environment" >&2
           exit 1
         fi
 
-      else
-        echo ">> SKIP_NVM=1 → skipping NVM initialization"
       fi
 
       # -------------------------------------------------
-      # Execute command
+      # Execute command (stdout = pure result)
       # -------------------------------------------------
       "$@"
     ' bash "$@"

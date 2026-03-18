@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format:{framework_version}-{dependency}",
  "creation": "2026-03-17 01:11:20.550051",
@@ -51,7 +52,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 10:23:20.781116",
+ "modified": "2026-03-18 22:08:32.371190",
  "modified_by": "Administrator",
  "module": "Dt Master",
  "name": "Framework Version Dependency",

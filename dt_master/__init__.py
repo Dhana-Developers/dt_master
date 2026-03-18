@@ -1,1 +1,1 @@
-__version__ = "0.2.3" # Fix: update postfix user management
+__version__ = "0.2.4" # Fix: allow import of data in select doctypes
