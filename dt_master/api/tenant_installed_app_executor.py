@@ -483,6 +483,9 @@ def _run_app_action(tenant_name, row_name, action, source=None):
 
     try:
         _mark_action_running(tenant, app_row, action)
+        frappe.logger().info(
+            f"[TRACE] action={action}, source={source}, tenant={tenant.name}, row={app_row.name}"
+        )
         if source == "tenant":
             publish_install_event(tenant, app_row)
 
@@ -570,6 +573,10 @@ def publish_install_event(tenant, app_row):
         "error": app_row.last_error,
         "site": tenant.fqdn
     }
+
+    frappe.logger().info(
+        f"[PUBLISH] tenant={tenant.name}, data={data}"
+    )
 
     try:
         _tenant_api_call(
