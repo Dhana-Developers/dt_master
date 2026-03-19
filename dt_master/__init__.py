@@ -1,1 +1,1 @@
-__version__ = "0.2.4" # Fix: allow import of data in select doctypes
+__version__ = "0.2.5" # Fix: correct tenant installed app base url generation for http protocol

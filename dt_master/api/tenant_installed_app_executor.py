@@ -523,11 +523,21 @@ def _run_app_action(tenant_name, row_name, action):
 
 def tenant_base_url(tenant):
     protocol = (tenant.protocol or "https").lower().replace("://", "")
+    fqdn = tenant.fqdn
     port = tenant.port
 
-    if port:
-        return f"{protocol}://{tenant.fqdn}:{port}"
-    return f"{protocol}://{tenant.fqdn}"
+    if protocol == "https":
+        # Public access via Nginx
+        return f"https://{fqdn}"
+
+    if protocol == "http":
+        # Dev/local access must have a port
+        if not port:
+            raise ValueError(f"HTTP tenant '{fqdn}' requires a port")
+
+        return f"http://{fqdn}:{port}"
+
+    raise ValueError(f"Unsupported protocol: {protocol}")
 
 def _tenant_api_call(tenant, path, data=None):
 
