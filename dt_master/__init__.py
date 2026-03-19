@@ -1,1 +1,1 @@
-__version__ = "0.2.10" # Fix: correct subscription end date logic
+__version__ = "0.2.11" # Fix: fetching extensions to get only public extensions

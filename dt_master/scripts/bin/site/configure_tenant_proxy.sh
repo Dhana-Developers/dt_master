@@ -131,6 +131,16 @@ server {
         proxy_send_timeout 600s;
     }
 
+    location /files/ {
+        alias ${PROJECT_BASE_DIR}/bench/sites/${SITE_NAME}/public/files/;
+
+        try_files \$uri =404;
+
+        expires 1y;
+        add_header Cache-Control "public";
+        access_log off;
+    }
+
     location / {
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-For \$remote_addr;
@@ -235,6 +245,16 @@ server {
 
         proxy_read_timeout 600s;
         proxy_send_timeout 600s;
+    }
+
+    location /files/ {
+        alias ${PROJECT_BASE_DIR}/bench/sites/${SITE_NAME}/public/files/;
+
+        try_files \$uri =404;
+
+        expires 1y;
+        add_header Cache-Control "public";
+        access_log off;
     }
 
     location / {

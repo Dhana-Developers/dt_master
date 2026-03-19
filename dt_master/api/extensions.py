@@ -17,7 +17,7 @@ def get_extensions(tab=None, limit=12, offset=0, fqdn=None, frappe_major=None, f
 
     tenant_version = (frappe_major, frappe_minor, frappe_patch)
 
-    filters = {"status": "Approved"}
+    filters = {"status": "Approved","visibility": "Public"}
 
     extensions = frappe.get_all(
         "Extension",
