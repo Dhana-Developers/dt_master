@@ -2,6 +2,21 @@ import frappe
 
 from frappe.utils import now_datetime
 
+def _trigger_tenant_executor(tenant_name, row_name, action):
+
+    job = frappe.enqueue(
+        f"dt_master.api.tenant_installed_app_executor.{action}",
+        tenant_name=tenant_name,
+        row_name=row_name,
+        source="tenant",
+        queue="long",
+        timeout=1500
+    )
+
+    frappe.logger().info(f"Executor queued: job_id={job.id}, tenant={tenant_name}, row={row_name}")
+
+    return job
+
 def resolve_latest_minor_version(extension):
     import subprocess
 
@@ -102,7 +117,7 @@ def install_extension_for_tenant(extension_name, fqdn):
             tenant.save(ignore_permissions=True)
             frappe.db.commit()
 
-            job = _trigger_tenant_executor(tenant.site_name, existing_row.name)
+            job = _trigger_tenant_executor(tenant.site_name, existing_row.name, "install_app")
 
             return {
                 "status": "retrying",
@@ -164,19 +179,6 @@ def install_extension_for_tenant(extension_name, fqdn):
         "job_id": job.id
     }
 
-def _trigger_tenant_executor(tenant_name, row_name):
-
-    job = frappe.enqueue(
-        "dt_master.api.tenant_installed_app_executor.install_app",
-        tenant_name=tenant_name,
-        row_name=row_name,
-        queue="long",
-        timeout=1500
-    )
-
-    frappe.logger().info(f"Executor queued: job_id={job.id}, tenant={tenant_name}, row={row_name}")
-
-    return job
 
 @frappe.whitelist()
 def upgrade_extension_for_tenant(extension_name, fqdn):
@@ -222,13 +224,7 @@ def upgrade_extension_for_tenant(extension_name, fqdn):
     tenant.save(ignore_permissions=True)
     frappe.db.commit()
 
-    job = frappe.enqueue(
-        "dt_master.api.tenant_installed_app_executor.upgrade_app",
-        tenant_name=tenant.site_name,
-        row_name=existing_row.name,
-        queue="long",
-        timeout=1500
-    )
+    job = _trigger_tenant_executor(tenant.site_name, existing_row.name, "upgrade_app")
 
     return {
         "status": "upgrade_queued",
@@ -270,13 +266,7 @@ def uninstall_extension_for_tenant(extension_name, fqdn):
     tenant.save(ignore_permissions=True)
     frappe.db.commit()
 
-    job = frappe.enqueue(
-        "dt_master.api.tenant_installed_app_executor.uninstall_app",
-        tenant_name=tenant.site_name,
-        row_name=existing_row.name,
-        queue="long",
-        timeout=1500
-    )
+    job = _trigger_tenant_executor(tenant.site_name, existing_row.name, "uninstall_app")
 
     return {
         "status": "uninstall_queued",

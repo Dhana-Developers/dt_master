@@ -476,15 +476,15 @@ def _handle_mutating_result(tenant, app_row, action_def, result):
 # MAIN ORCHESTRATOR
 # ---------------------------------------------------------------------
 
-def _run_app_action(tenant_name, row_name, action):
+def _run_app_action(tenant_name, row_name, action, source=None):
 
     tenant, app_row, node = _load_action_context(tenant_name, row_name)
     action_def = _validate_action(app_row, action)
 
     try:
         _mark_action_running(tenant, app_row, action)
-
-        publish_install_event(tenant, app_row)
+        if source == "tenant":
+            publish_install_event(tenant, app_row)
 
         result = _execute_action(
             node, tenant, app_row, action_def["script"]
@@ -495,7 +495,8 @@ def _run_app_action(tenant_name, row_name, action):
         else:
             output = _handle_mutating_result(tenant, app_row, action_def, result)
 
-        publish_install_event(tenant, app_row)
+        if source == "tenant":
+            publish_install_event(tenant, app_row)
 
         return output
 
@@ -585,33 +586,33 @@ def publish_install_event(tenant, app_row):
 # FRAPPE WHITELISTED FUNCTIONS
 # ---------------------------------------------------------------------
 @frappe.whitelist()
-def install_app(tenant_name, row_name):
-    return _run_app_action(tenant_name, row_name, "install")
+def install_app(tenant_name, row_name, source=None):
+    return _run_app_action(tenant_name, row_name, "install", source=source)
 
 @frappe.whitelist()
-def upgrade_app(tenant_name, row_name):
-    return _run_app_action(tenant_name, row_name, "upgrade")
+def upgrade_app(tenant_name, row_name, source=None):
+    return _run_app_action(tenant_name, row_name, "upgrade", source=source)
 
 @frappe.whitelist()
-def downgrade_app(tenant_name, row_name):
-    return _run_app_action(tenant_name, row_name, "downgrade")
+def downgrade_app(tenant_name, row_name, source=None):
+    return _run_app_action(tenant_name, row_name, "downgrade", source=source)
 
 @frappe.whitelist()
-def reinstall_app(tenant_name, row_name):
-    return _run_app_action(tenant_name, row_name, "install")
+def reinstall_app(tenant_name, row_name, source=None):
+    return _run_app_action(tenant_name, row_name, "install", source=source)
 
 @frappe.whitelist()
-def uninstall_app(tenant_name, row_name):
-    return _run_app_action(tenant_name, row_name, "uninstall")
+def uninstall_app(tenant_name, row_name, source=None):
+    return _run_app_action(tenant_name, row_name, "uninstall", source=source)
 
 @frappe.whitelist()
-def remove_app(tenant_name, row_name):
-    return _run_app_action(tenant_name, row_name, "remove")
+def remove_app(tenant_name, row_name, source=None):
+    return _run_app_action(tenant_name, row_name, "remove", source=source)
 
 @frappe.whitelist()
-def check_version(tenant_name, row_name):
-    return _run_app_action(tenant_name, row_name, "check_version")
+def check_version(tenant_name, row_name, source=None):
+    return _run_app_action(tenant_name, row_name, "check_version", source=source)
 
 @frappe.whitelist()
-def check_app(tenant_name, row_name):
-    return _run_app_action(tenant_name, row_name, "check_app")
+def check_app(tenant_name, row_name, source=None):
+    return _run_app_action(tenant_name, row_name, "check_app", source=source)
