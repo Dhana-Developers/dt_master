@@ -184,11 +184,13 @@ def get_extensions(tab=None, limit=12, offset=0, fqdn=None, frappe_major=None, f
         result = [
             r for r in result
             if r["install_state"] == "installed"
+            and r["visibility"] == "Public"
         ]
 
     elif tab == "uninstalled":
         result = [
             r for r in result
             if r["install_state"] == "uninstalled"
+            and r["visibility"] == "Public"
         ]
     return result
