@@ -51,7 +51,7 @@ def get_tenant_capabilities(fqdn):
     trial_end = getattr(subscription, "trial_end_date", None)
 
     # active billing period end
-    period_end = getattr(subscription, "current_invoice_start", None)
+    period_end = getattr(subscription, "current_invoice_end", None)
 
     # fallback if subscription has fixed end
     end_date = getattr(subscription, "end_date", None) or period_end
