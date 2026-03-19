@@ -518,7 +518,8 @@ def _run_app_action(tenant_name, row_name, action, source=None):
             message=error
         )
 
-        publish_install_event(tenant, app_row)
+        if source == "tenant":
+            publish_install_event(tenant, app_row)
 
         raise
 
