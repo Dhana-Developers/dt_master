@@ -75,6 +75,25 @@ chmod o+x "$PROJECT_BASE_DIR/bench/sites" || true
 chmod -R o+rX "$ASSETS_PATH" || true
 
 # -------------------------------------------------
+# Ensure WebSocket upgrade map exists (global)
+# -------------------------------------------------
+NGINX_MAP_FILE="/etc/nginx/conf.d/websocket_map.conf"
+
+if [ ! -f "$NGINX_MAP_FILE" ]; then
+  log "Creating Nginx WebSocket map config"
+
+  cat >"$NGINX_MAP_FILE" <<EOF
+# WebSocket connection upgrade mapping
+map \$http_upgrade \$connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+EOF
+else
+  log "WebSocket map config already exists"
+fi
+
+# -------------------------------------------------
 # Write HTTP server block (always)
 # -------------------------------------------------
 log "Writing Nginx HTTP config: $NGINX_CONF_FILE"
@@ -96,6 +115,20 @@ server {
         expires 1y;
         add_header Cache-Control "public";
         access_log off;
+    }
+
+    location /socket.io {
+        proxy_pass http://127.0.0.1:9000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection \$connection_upgrade;
+
+        proxy_set_header Host \$host;
+        proxy_set_header Origin \$scheme://\$host;
+
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
     }
 
     location / {
@@ -188,6 +221,20 @@ server {
         expires 1y;
         add_header Cache-Control "public";
         access_log off;
+    }
+
+    location /socket.io {
+        proxy_pass http://127.0.0.1:9000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection \$connection_upgrade;
+
+        proxy_set_header Host \$host;
+        proxy_set_header Origin \$scheme://\$host;
+
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
     }
 
     location / {
