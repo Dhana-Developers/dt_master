@@ -20,20 +20,38 @@ APP_DIR="${BENCH_DIR}/apps/${APP}"
 cd "$BENCH_DIR"
 
 # ------------------------------------------------------------
-# Guards
+# Guards (non-fatal)
 # ------------------------------------------------------------
 if [[ ! -d "$APP_DIR" ]]; then
-    log "error=app_not_present_in_bench"
+    log "warning=app_not_present_in_bench"
     log "app=${APP}"
-    exit 1
+
+    log "available_apps_in_bench:"
+    ls -1 "${BENCH_DIR}/apps" | while read -r a; do
+        log " - ${a}"
+    done
+
+    echo "app_name=${APP}"
+    echo "site=${SITE}"
+    echo "uninstalled=false"
+    exit 0
 fi
 
 # Check if app is installed on site
-if ! bench_exec --site "$SITE" list-apps | grep -qx "$APP"; then
-    log "error=app_not_installed_on_site"
+if ! bench_exec --site "$SITE" list-apps | awk '{print $1}' | grep -qx "$APP"; then
+    log "warning=app_not_installed_on_site"
     log "app=${APP}"
     log "site=${SITE}"
-    exit 1
+
+    log "installed_apps_on_site:"
+    bench_exec --site "$SITE" list-apps | while read -r a; do
+        log " - ${a}"
+    done
+
+    echo "app_name=${APP}"
+    echo "site=${SITE}"
+    echo "uninstalled=false"
+    exit 0
 fi
 
 # ------------------------------------------------------------

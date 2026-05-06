@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "autoincrement",
  "creation": "2025-12-18 13:23:35.851899",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -17,8 +18,7 @@
    "in_standard_filter": 1,
    "label": "Role",
    "options": "Role",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "description",
@@ -32,10 +32,11 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-19 11:38:11.988631",
+ "modified": "2026-04-17 16:36:45.067019",
  "modified_by": "Administrator",
  "module": "Dt Master",
  "name": "Capability Role",
+ "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

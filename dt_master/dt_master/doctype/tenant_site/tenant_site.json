@@ -55,7 +55,6 @@
   {
    "fieldname": "site_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Site Name",
    "reqd": 1,
    "unique": 1
@@ -203,6 +202,7 @@
   {
    "fieldname": "automation_state",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "State",
    "options": "idle\nqueued\ncreating_site\ninstalling_apps\nconfiguring_nginx\nverifying\nready\nsuspending\nresuming\narchiving\ndestroying\nfailed"
   },
@@ -273,7 +273,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-05 15:47:54.978818",
+ "modified": "2026-03-20 09:08:07.810451",
  "modified_by": "Administrator",
  "module": "Dt Master",
  "name": "Tenant Site",

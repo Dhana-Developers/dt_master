@@ -4,11 +4,17 @@ app_publisher = "Dhana Technologies"
 app_description = "Dhana technologies master site generates, configures and manages tenant sites"
 app_email = "enquiries@dhanatechnologies.com"
 app_license = "agpl-3.0"
+app_logo_url = "/assets/dt_master/images/DHANA.svg"
+
+website_context = {
+	"favicon": "/assets/dt_master/images/favicon.ico",
+	"splash_image": "/assets/dt_master/images/DHANA.png"
+}
 
 # Apps
 # ------------------
 
-# required_apps = []
+required_apps = ['frappe','erpnext']
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -27,6 +33,7 @@ app_license = "agpl-3.0"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/dt_master/css/dt_master.css"
 # app_include_js = "/assets/dt_master/js/dt_master.js"
+
 
 # include js, css files in header of web template
 # web_include_css = "/assets/dt_master/css/dt_master.css"

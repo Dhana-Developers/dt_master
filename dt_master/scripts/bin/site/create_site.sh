@@ -41,30 +41,28 @@ log "Using Frappe upstream port: $FRAPPE_UPSTREAM_PORT"
 # -------------------------------------------------
 ensure_db_user() {
 
-  log "Ensuring MariaDB user '${MYSQL_ROOT_USER}'@'localhost' exists"
+  log "Ensuring MariaDB admin user '${MYSQL_ROOT_USER}'@'localhost' exists"
 
-  USER_EXISTS=$(mysql -N -s -e "
-    SELECT EXISTS(
-      SELECT 1
-      FROM mysql.user
-      WHERE user='${MYSQL_ROOT_USER}'
-      AND host='localhost'
-    );
-  ")
+  mysql <<SQL
+DROP USER IF EXISTS '${MYSQL_ROOT_USER}'@'localhost';
 
-  if [ "$USER_EXISTS" = "1" ]; then
-    log "MariaDB user '${MYSQL_ROOT_USER}'@'localhost' already exists"
-  else
-    log "Creating MariaDB user '${MYSQL_ROOT_USER}'@'localhost'"
+CREATE USER '${MYSQL_ROOT_USER}'@'localhost'
+IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
 
-    mysql <<SQL
-CREATE USER IF NOT EXISTS '${MYSQL_ROOT_USER}'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_ROOT_USER}'@'localhost' WITH GRANT OPTION;
+ALTER USER '${MYSQL_ROOT_USER}'@'localhost'
+IDENTIFIED VIA mysql_native_password;
+
+SET PASSWORD FOR '${MYSQL_ROOT_USER}'@'localhost'
+= PASSWORD('${MYSQL_ROOT_PASSWORD}');
+
+GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_ROOT_USER}'@'localhost'
+WITH GRANT OPTION;
+
 FLUSH PRIVILEGES;
 SQL
 
-    log "MariaDB user '${MYSQL_ROOT_USER}'@'localhost' created"
-  fi
+  log "MariaDB admin user '${MYSQL_ROOT_USER}' ready"
+
 }
 
 ensure_db_user

@@ -176,7 +176,7 @@ def _execute_ssh_script(node, tenant, script_name, apps=None):
     )
 
     ssh_command = (
-        f"ssh -p {ssh['port']} "
+        f"ssh -vvv -p {ssh['port']} "
         f"{ssh['user']}@{ssh['host']} "
         f"{shlex.quote(remote_cmd)}"
     )
